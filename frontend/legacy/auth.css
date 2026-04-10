@@ -1,0 +1,242 @@
+/* Authentication pages styling */
+.mirror-letter {
+  display: inline-block;
+  transform: scaleX(-1);
+}
+.auth-main {
+    min-height: calc(100vh - 80px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 500px;
+    padding: 0 2rem;
+}
+
+.auth-card {
+    background: white;
+    padding: 3rem;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    border: 1px solid #e1e8ed;
+}
+
+.auth-card h2 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+    font-size: 2rem;
+}
+
+.auth-subtitle {
+    text-align: center;
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+    font-size: 1rem;
+}
+
+.auth-form {
+    margin-bottom: 2rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select {
+    width: 100%;
+    padding: 0.875rem;
+    border: 2px solid #e1e8ed;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.form-group input:invalid {
+    border-color: #e74c3c;
+}
+
+.form-help {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.85rem;
+    color: #7f8c8d;
+}
+
+.form-options {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    color: #2c3e50;
+    user-select: none;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: auto;
+    margin: 0;
+    opacity: 0;
+    position: absolute;
+}
+
+.checkmark {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #bdc3c7;
+    border-radius: 4px;
+    margin-right: 0.75rem;
+    position: relative;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark {
+    background: #3498db;
+    border-color: #3498db;
+}
+
+.checkbox-label input[type="checkbox"]:checked + .checkmark::after {
+    content: '✓';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.checkbox-label input[type="checkbox"]:focus + .checkmark {
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+.forgot-link {
+    color: #3498db;
+    text-decoration: none;
+    font-size: 0.95rem;
+    transition: color 0.3s ease;
+}
+
+.forgot-link:hover {
+    color: #2980b9;
+    text-decoration: underline;
+}
+
+.btn-full {
+    width: 100%;
+    padding: 1rem;
+    font-size: 1.1rem;
+    margin-top: 0.5rem;
+}
+
+.auth-footer {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid #ecf0f1;
+}
+
+.auth-footer p {
+    color: #7f8c8d;
+    margin: 0;
+}
+
+.auth-footer a {
+    color: #3498db;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.logo a {
+    text-decoration: none;
+    color: inherit;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .auth-card {
+        padding: 2rem 1.5rem;
+        margin: 1rem;
+    }
+    
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+    
+    .form-options {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .checkbox-label {
+        align-self: stretch;
+    }
+}
+
+/* Enhanced accessibility */
+@media (prefers-reduced-motion: reduce) {
+    .form-group input,
+    .form-group select,
+    .checkmark,
+    .forgot-link {
+        transition: none;
+    }
+}
+
+/* High contrast support */
+@media (prefers-contrast: high) {
+    .auth-card {
+        border: 2px solid #000;
+    }
+    
+    .form-group input,
+    .form-group select {
+        border-color: #000;
+    }
+    
+    .checkmark {
+        border-color: #000;
+    }
+}

@@ -1,0 +1,149 @@
+@import url('https://fonts.googleapis.com/css2?family=OpenDyslexic:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --theme-bg: #f8fafc;
+  --theme-bg-soft: #eef2ff;
+  --theme-card: #ffffff;
+  --theme-text: #1e293b;
+  --theme-muted: #475569;
+  --theme-border: #cbd5e1;
+}
+
+.dark {
+  --theme-bg: #0f172a;
+  --theme-bg-soft: #111827;
+  --theme-card: #1e293b;
+  --theme-text: #f1f5f9;
+  --theme-muted: #cbd5e1;
+  --theme-border: #334155;
+}
+
+@layer base {
+  * {
+    border-color: var(--theme-border);
+  }
+  
+  body {
+    @apply font-sans;
+    color: var(--theme-text);
+    background: linear-gradient(135deg, var(--theme-bg) 0%, var(--theme-bg-soft) 50%, var(--theme-bg) 100%);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    line-height: 1.7;
+    transition: background 300ms ease, color 300ms ease;
+  }
+  
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--theme-bg);
+  }
+}
+
+.mirror-letter {
+  display: inline-block;
+  transform: scaleX(-1);
+}
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center rounded-lg px-4 py-2 text-base font-semibold min-w-[6rem] min-h-[2.75rem] transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none active:scale-95;
+  }
+  
+  .btn-primary {
+    @apply bg-primary-600 text-white hover:bg-primary-700 focus:ring-primary-500 shadow-md hover:shadow-lg transform hover:-translate-y-0.5;
+  }
+  
+  .btn-secondary {
+    @apply bg-white text-primary-700 border border-primary-200 hover:bg-primary-50 focus:ring-primary-500 shadow-sm hover:shadow-md;
+  }
+  
+  .btn-outline {
+    @apply border hover:bg-slate-50 focus:ring-slate-500;
+    background-color: var(--theme-card);
+    color: var(--theme-text);
+    border-color: var(--theme-border);
+  }
+  
+  .btn-ghost {
+    @apply bg-transparent hover:bg-slate-100;
+    color: var(--theme-text);
+  }
+  
+  .btn-lg {
+    @apply px-6 py-3 text-lg min-h-[3rem];
+  }
+  
+  .btn-sm {
+    @apply px-3 py-2 text-sm min-h-[2.5rem];
+  }
+  
+  .card {
+    @apply rounded-3xl shadow-lg border overflow-hidden min-h-0;
+    background-color: var(--theme-card);
+    border-color: var(--theme-border);
+    color: var(--theme-text);
+    box-shadow: 0 12px 30px -18px rgba(15, 23, 42, 0.22);
+    transition: background-color 300ms ease, border-color 300ms ease, box-shadow 300ms ease;
+  }
+  
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-2xl hover:-translate-y-1;
+  }
+  
+  .input {
+    @apply w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+    background-color: var(--theme-card);
+    color: var(--theme-text);
+    border-color: var(--theme-border);
+  }
+  
+  .input-error {
+    @apply border-danger-500 focus:ring-danger-500;
+  }
+  
+  .gradient-bg {
+    background: linear-gradient(135deg, var(--theme-bg) 0%, var(--theme-bg-soft) 50%, var(--theme-bg) 100%);
+  }
+  
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-600 via-secondary-600 to-success-600 bg-clip-text text-transparent;
+  }
+  
+  .glass-effect {
+    @apply backdrop-blur-sm border;
+    background-color: var(--theme-card);
+    border-color: var(--theme-border);
+  }
+  
+  .floating-animation {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  .pulse-glow {
+    @apply animate-pulse shadow-lg;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+  }
+  
+  .game-text {
+    font-family: 'OpenDyslexic', 'Inter', system-ui, sans-serif;
+    letter-spacing: 0.02em;
+    line-height: 1.75;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - DysLexia Support</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <nav class="navbar">
+            <div class="nav-container">
+                <div class="logo">
+                    <a href="index.html"><h1>DysLexia Support</h1></a>
+                </div>
+                <div class="nav-links">
+                    <a href="login.html" class="btn btn-outline">Login</a>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="auth-main">
+        <div class="auth-container">
+            <div class="auth-card">
+                <h2>Join Our Community</h2>
+                <p class="auth-subtitle">Create your account to get started</p>
+                
+                <form class="auth-form" id="registerForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="firstName" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="lastName">Last Name</label>
+                            <input type="text" id="lastName" name="lastName" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email Address</label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" required>
+                        <small class="form-help">At least 8 characters with letters and numbers</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" name="confirmPassword" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="userType">I am a:</label>
+                        <select id="userType" name="userType" required>
+                            <option value="">Select your role</option>
+                            <option value="individual">Individual with dyslexia</option>
+                            <option value="parent">Parent/Guardian</option>
+                            <option value="educator">Educator/Teacher</option>
+                            <option value="professional">Healthcare Professional</option>
+                            <option value="researcher">Researcher</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="terms" required>
+                            <span class="checkmark"></span>
+                            I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a>
+                        </label>
+                    </div>
+                    
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="newsletter">
+                            <span class="checkmark"></span>
+                            Send me updates and resources via email
+                        </label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary btn-full">Create Account</button>
+                </form>
+                
+                <div class="auth-footer">
+                    <p>Already have an account? <a href="login.html">Sign in here</a></p>
+                </div>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dyslexia Assessment</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="container fade-in">
+    <h1>🧠 Dyslexia Screening Assessment</h1>
+    <p>Answer the questions below carefully.</p>
+
+    <div class="video-container">
+      <video id="webcam" autoplay muted></video>
+    </div>
+
+    <div id="question-section">
+      <div id="question-container" class="assessment"></div>
+    </div>
+  </div>
+
+  <script>
+    // --- Ensure calibration is done ---
+    const calibrated = sessionStorage.getItem("calibration_done");
+    if (!calibrated) {
+      alert("Please complete calibration first!");
+      window.location.href = "/static/calibration.html";
+    }
+
+    // --- Load student info ---
+    const studentInfo = JSON.parse(localStorage.getItem("studentInfo"));
+    if (!studentInfo || !studentInfo.name || !studentInfo.age || !studentInfo.grade) {
+      alert("Please enter your details first!");
+      window.location.href = "/static/index.html";
+    }
+
+    // --- Session ID ---
+    let userId = sessionStorage.getItem("user_id");
+    if (!userId) {
+      userId = crypto.randomUUID();
+      sessionStorage.setItem("user_id", userId);
+    }
+
+    const studentName = studentInfo.name;
+    const studentAge = studentInfo.age;
+    
+    // ========== COMPREHENSIVE DATA TRACKING ==========
+    const gazeData = []; // Real-time gaze coordinates
+    const interactionEvents = []; // Mouse, keyboard, touch events
+    const taskTimestamps = []; // Question start/end times
+    const errors = []; // Question errors with details
+    let currentQuestionStartTime = null;
+    
+    let gazeInterval = null;
+    let webcamStream = null;
+    const video = document.getElementById("webcam");
+    
+    // Device metadata
+    const deviceMetadata = {
+      screen_width: window.screen.width,
+      screen_height: window.screen.height,
+      viewport_width: window.innerWidth,
+      viewport_height: window.innerHeight,
+      device_type: /Mobile|Android|iPhone|iPad/.test(navigator.userAgent) ? "Mobile" : "Desktop",
+      user_agent: navigator.userAgent,
+      language: navigator.language || "en",
+      platform: navigator.platform
+    };
+    
+    // Calibration data
+    const calibrationData = JSON.parse(sessionStorage.getItem("calibration_data") || "{}");
+
+    // --- Questions ---
+    const questions = [
+      { id: 1, question: "Which word is spelled correctly?", options: ["Recieve","Receive","Receeve","Receve"], answer: "Receive" },
+      { id: 2, question: "Find the pattern: 2, 4, 8, 16, ?", options: ["18","24","32","30"], answer: "32" },
+      { id: 3, question: "Which one is different?", options: ["Cat","Dog","Car","Cow"], answer: "Car" },
+      { id: 4, question: "Which letters form the word 'read' when rearranged?", options: ["rdae","ared","dear","daer"], answer: "dear" }
+    ];
+    let current = 0;
+    let score = 0;
+    const assessmentStartTime = Date.now();
+
+    // ========== REAL-TIME GAZE TRACKING ==========
+    // Track mouse/pointer position as proxy for gaze
+    let lastMouseX = null;
+    let lastMouseY = null;
+    let lastMouseTime = Date.now();
+
+    function normalizeCoordinates(x, y) {
+      // Normalize to 0-1 range based on viewport
+      return {
+        x: x / window.innerWidth,
+        y: y / window.innerHeight
+      };
+    }
+
+    function captureGazePoint(x, y) {
+      const now = Date.now();
+      const normalized = normalizeCoordinates(x, y);
+      gazeData.push({
+        x: normalized.x,
+        y: normalized.y,
+        t: now,
+        raw_x: x,
+        raw_y: y
+      });
+      lastMouseX = x;
+      lastMouseY = y;
+      lastMouseTime = now;
+    }
+
+    // Track mouse movement
+    document.addEventListener("mousemove", (e) => {
+      captureGazePoint(e.clientX, e.clientY);
+    });
+
+    // Track pointer/touch events
+    document.addEventListener("pointermove", (e) => {
+      captureGazePoint(e.clientX, e.clientY);
+    });
+
+    // Periodic capture even when mouse isn't moving (for fixations)
+    function startGazeCapture() {
+      gazeInterval = setInterval(() => {
+        if (lastMouseX !== null && lastMouseY !== null) {
+          // Capture current position periodically
+          const now = Date.now();
+          if (now - lastMouseTime > 50) { // Only if mouse hasn't moved recently
+            captureGazePoint(lastMouseX, lastMouseY);
+          }
+        }
+      }, 50); // Capture every 50ms for high-frequency data
+    }
+
+    // ========== INTERACTION EVENTS TRACKING ==========
+    function logInteractionEvent(type, details) {
+      interactionEvents.push({
+        type: type, // 'mouse', 'keyboard', 'touch', 'click', 'scroll'
+        timestamp: Date.now(),
+        ...details
+      });
+    }
+
+    // Mouse events
+    document.addEventListener("click", (e) => {
+      logInteractionEvent("click", {
+        x: e.clientX,
+        y: e.clientY,
+        target: e.target.tagName,
+        button: e.button
+      });
+    });
+
+    document.addEventListener("mousedown", (e) => {
+      logInteractionEvent("mousedown", { x: e.clientX, y: e.clientY });
+    });
+
+    document.addEventListener("mouseup", (e) => {
+      logInteractionEvent("mouseup", { x: e.clientX, y: e.clientY });
+    });
+
+    // Keyboard events
+    document.addEventListener("keydown", (e) => {
+      logInteractionEvent("keydown", {
+        key: e.key,
+        code: e.code,
+        ctrlKey: e.ctrlKey,
+        shiftKey: e.shiftKey
+      });
+    });
+
+    document.addEventListener("keyup", (e) => {
+      logInteractionEvent("keyup", { key: e.key, code: e.code });
+    });
+
+    // Scroll events
+    let scrollTimeout;
+    window.addEventListener("scroll", () => {
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        logInteractionEvent("scroll", {
+          scrollX: window.scrollX,
+          scrollY: window.scrollY
+        });
+      }, 100);
+    });
+
+    // ========== DERIVED EYE FEATURES COMPUTATION ==========
+    function computeDerivedFeatures() {
+      if (gazeData.length < 3) {
+        return {
+          fixations: [],
+          saccades: [],
+          regressions: { count: 0, timestamps: [] },
+          fixation_stats: { mean_duration: 0, std_duration: 0, count: 0 },
+          saccade_stats: { mean_amplitude: 0, mean_velocity: 0, count: 0 },
+          scanpath_entropy: 0
+        };
+      }
+
+      // I-VT algorithm: Identify fixations and saccades based on velocity
+      const velocityThreshold = 0.02; // Normalized units per sample
+      const minFixationDuration = 100; // ms
+      
+      const fixations = [];
+      const saccades = [];
+      
+      // Compute velocities
+      const velocities = [];
+      for (let i = 1; i < gazeData.length; i++) {
+        const dt = gazeData[i].t - gazeData[i-1].t;
+        if (dt <= 0) continue;
+        const dx = gazeData[i].x - gazeData[i-1].x;
+        const dy = gazeData[i].y - gazeData[i-1].y;
+        const distance = Math.sqrt(dx*dx + dy*dy);
+        const velocity = distance / (dt / 1000.0); // per second
+        velocities.push({ idx: i, velocity, dt, distance });
+      }
+
+      // Identify fixations (low velocity) and saccades (high velocity)
+      let fixationStart = 0;
+      for (let i = 0; i < velocities.length; i++) {
+        const isSaccade = velocities[i].velocity > velocityThreshold;
+        
+        if (isSaccade) {
+          // End current fixation if exists
+          if (fixationStart < velocities[i].idx) {
+            const startIdx = fixationStart;
+            const endIdx = velocities[i].idx - 1;
+            const startTime = gazeData[startIdx].t;
+            const endTime = gazeData[endIdx].t;
+            const duration = endTime - startTime;
+            
+            if (duration >= minFixationDuration) {
+              // Compute fixation centroid
+              let sumX = 0, sumY = 0;
+              for (let j = startIdx; j <= endIdx; j++) {
+                sumX += gazeData[j].x;
+                sumY += gazeData[j].y;
+              }
+              const count = endIdx - startIdx + 1;
+              fixations.push({
+                start_ts: startTime,
+                end_ts: endTime,
+                x: sumX / count,
+                y: sumY / count,
+                duration: duration
+              });
+            }
+          }
+          
+          // Record saccade
+          const saccStartIdx = velocities[i].idx - 1;
+          const saccEndIdx = velocities[i].idx;
+          if (saccStartIdx >= 0 && saccEndIdx < gazeData.length) {
+            const dx = gazeData[saccEndIdx].x - gazeData[saccStartIdx].x;
+            const dy = gazeData[saccEndIdx].y - gazeData[saccStartIdx].y;
+            const amplitude = Math.sqrt(dx*dx + dy*dy);
+            const duration = gazeData[saccEndIdx].t - gazeData[saccStartIdx].t;
+            const velocity = amplitude / (duration / 1000.0);
+            
+            saccades.push({
+              start_ts: gazeData[saccStartIdx].t,
+              end_ts: gazeData[saccEndIdx].t,
+              amplitude: amplitude,
+              velocity: velocity
+            });
+          }
+          
+          fixationStart = velocities[i].idx;
+        }
+      }
+      
+      // Final fixation
+      if (fixationStart < gazeData.length - 1) {
+        const startIdx = fixationStart;
+        const endIdx = gazeData.length - 1;
+        const startTime = gazeData[startIdx].t;
+        const endTime = gazeData[endIdx].t;
+        const duration = endTime - startTime;
+        
+        if (duration >= minFixationDuration) {
+          let sumX = 0, sumY = 0;
+          for (let j = startIdx; j <= endIdx; j++) {
+            sumX += gazeData[j].x;
+            sumY += gazeData[j].y;
+          }
+          const count = endIdx - startIdx + 1;
+          fixations.push({
+            start_ts: startTime,
+            end_ts: endTime,
+            x: sumX / count,
+            y: sumY / count,
+            duration: duration
+          });
+        }
+      }
+
+      // Detect regressions (backward movements in x for LTR languages)
+      const regressions = { count: 0, timestamps: [] };
+      for (let i = 1; i < fixations.length; i++) {
+        if (fixations[i].x < fixations[i-1].x) {
+          regressions.count++;
+          regressions.timestamps.push(fixations[i].start_ts);
+        }
+      }
+
+      // Compute statistics
+      const fixationDurations = fixations.map(f => f.duration);
+      const meanDuration = fixationDurations.length > 0 
+        ? fixationDurations.reduce((a, b) => a + b, 0) / fixationDurations.length 
+        : 0;
+      const fixationStats = {
+        mean_duration: meanDuration,
+        std_duration: fixationDurations.length > 1
+          ? Math.sqrt(fixationDurations.reduce((sum, d) => sum + Math.pow(d - meanDuration, 2), 0) / fixationDurations.length)
+          : 0,
+        count: fixations.length
+      };
+
+      const saccadeAmplitudes = saccades.map(s => s.amplitude);
+      const saccadeVelocities = saccades.map(s => s.velocity);
+      const saccadeStats = {
+        mean_amplitude: saccadeAmplitudes.length > 0
+          ? saccadeAmplitudes.reduce((a, b) => a + b, 0) / saccadeAmplitudes.length
+          : 0,
+        mean_velocity: saccadeVelocities.length > 0
+          ? saccadeVelocities.reduce((a, b) => a + b, 0) / saccadeVelocities.length
+          : 0,
+        count: saccades.length
+      };
+
+      // Compute scanpath entropy (spatial distribution)
+      const gridSize = 8;
+      const gridCounts = new Map();
+      for (const point of gazeData) {
+        const gridX = Math.floor(point.x * gridSize);
+        const gridY = Math.floor(point.y * gridSize);
+        const key = `${gridX},${gridY}`;
+        gridCounts.set(key, (gridCounts.get(key) || 0) + 1);
+      }
+      
+      const total = gazeData.length;
+      let entropy = 0;
+      for (const count of gridCounts.values()) {
+        const p = count / total;
+        if (p > 0) {
+          entropy -= p * Math.log2(p);
+        }
+      }
+
+      return {
+        fixations,
+        saccades,
+        regressions,
+        fixation_stats: fixationStats,
+        saccade_stats: saccadeStats,
+        scanpath_entropy: entropy
+      };
+    }
+
+    // ========== READING SPEED CALCULATION ==========
+    function calculateReadingSpeed() {
+      if (taskTimestamps.length < 2) return 0;
+      
+      const startTimes = taskTimestamps.filter(t => t.event === 'start').map(t => t.t);
+      const endTimes = taskTimestamps.filter(t => t.event === 'end').map(t => t.t);
+      
+      if (startTimes.length === 0 || endTimes.length === 0) return 0;
+      
+      const totalTimeMs = Math.max(...endTimes) - Math.min(...startTimes);
+      if (totalTimeMs <= 0) return 0;
+      
+      // Count words in all questions
+      const totalWords = questions.reduce((sum, q) => {
+        return sum + q.question.split(/\s+/).length + q.options.join(' ').split(/\s+/).length;
+      }, 0);
+      
+      const totalTimeMinutes = totalTimeMs / (1000 * 60);
+      return totalWords / totalTimeMinutes; // words per minute
+    }
+
+    // ========== START WEBCAM & TRACKING ==========
+    async function startWebcam() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        webcamStream = stream;
+        video.srcObject = stream;
+        video.play();
+        startGazeCapture();
+      } catch (err) {
+        console.error("Webcam error:", err);
+        alert("❌ Please allow camera access.");
+      }
+    }
+
+    function stopWebcam() {
+      if (gazeInterval) { clearInterval(gazeInterval); gazeInterval = null; }
+      if (webcamStream) { webcamStream.getTracks().forEach(t => t.stop()); webcamStream = null; }
+    }
+
+    // ========== DISPLAY QUESTIONS ==========
+    function showQuestion() {
+      const q = questions[current];
+      currentQuestionStartTime = Date.now();
+      
+      // Log question start
+      taskTimestamps.push({
+        question_id: q.id,
+        event: 'start',
+        t: currentQuestionStartTime
+      });
+      
+      const container = document.getElementById("question-container");
+      container.innerHTML = `
+        <h2>Question ${current+1} / ${questions.length}</h2>
+        <div class="question-box">${q.question}</div>
+        <div class="options">
+          ${q.options.map(opt => `<button class="option-btn" onclick="checkAnswer('${opt.replace(/'/g, "\\'")}')">${opt}</button>`).join("")}
+        </div>
+      `;
+    }
+
+    function checkAnswer(selected) {
+      const q = questions[current];
+      const answerTime = Date.now();
+      const timeSpent = answerTime - currentQuestionStartTime;
+      const isCorrect = selected === q.answer;
+      
+      if (isCorrect) score++;
+      
+      // Log error if incorrect
+      if (!isCorrect) {
+        errors.push({
+          question_id: q.id,
+          user_answer: selected,
+          correct_answer: q.answer,
+          correct: false,
+          timestamp: answerTime,
+          time_spent_ms: timeSpent
+        });
+      }
+      
+      // Log question end
+      taskTimestamps.push({
+        question_id: q.id,
+        event: 'end',
+        t: answerTime,
+        time_spent_ms: timeSpent,
+        correct: isCorrect
+      });
+      
+      const buttons = document.querySelectorAll(".option-btn");
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        if (btn.textContent === q.answer) btn.classList.add("correct");
+        else if (btn.textContent === selected) btn.classList.add("incorrect");
+      });
+      
+      setTimeout(nextQuestion, 800);
+    }
+
+    function nextQuestion() {
+      current++;
+      if (current < questions.length) showQuestion();
+      else showResult();
+    }
+
+    // ========== SHOW RESULT & SEND TO SERVER ==========
+    function showResult() {
+      stopWebcam();
+      
+      // Compute all derived features
+      const derivedFeatures = computeDerivedFeatures();
+      const readingSpeed = calculateReadingSpeed();
+      const totalReadingTime = Date.now() - assessmentStartTime;
+      
+      const passed = score >= 3;
+      const risk = passed ? "Low" : "High";
+      const resultText = passed
+        ? "Low Risk of Dyslexia 🎉"
+        : "Potential Dyslexia Risk ⚠️ (Further screening suggested)";
+
+      const container = document.querySelector(".container");
+      container.innerHTML = `
+        <h1>Assessment Completed</h1>
+        <p>You answered ${score} out of ${questions.length} correctly.</p>
+        <h2>${resultText}</h2>
+        <div style="margin-top:20px; display:flex; gap:12px;">
+          <button class="exit-btn" onclick="goToDashboard()">Go to Dashboard</button>
+          <button class="exit-btn" onclick="viewMyReport()">View My Report</button>
+        </div>
+      `;
+
+      // Prepare comprehensive payload
+      const payload = {
+        session_id: userId,
+        user_id: userId,
+        name: studentName,
+        age: studentAge,
+        grade: studentInfo.grade,
+        score,
+        total: questions.length,
+        accuracy: (score/questions.length)*100,
+        risk,
+        timestamp: new Date().toISOString(),
+        
+        // Raw gaze data
+        gaze_stream: gazeData,
+        
+        // Derived eye features
+        fixations: derivedFeatures.fixations,
+        saccades: derivedFeatures.saccades,
+        regressions: derivedFeatures.regressions,
+        
+        // Derived statistics
+        fixation_stats: derivedFeatures.fixation_stats,
+        saccade_stats: derivedFeatures.saccade_stats,
+        scanpath_entropy: derivedFeatures.scanpath_entropy,
+        
+        // Reading metrics
+        reading_speed_wpm: readingSpeed,
+        total_reading_time_ms: totalReadingTime,
+        
+        // Errors
+        errors: errors,
+        
+        // Task timestamps
+        task_timestamps: taskTimestamps,
+        
+        // Interaction events
+        interaction_events: interactionEvents,
+        
+        // Metadata
+        device_metadata: deviceMetadata,
+        calibration_data: calibrationData,
+        
+        // Language (from metadata)
+        language: deviceMetadata.language
+      };
+
+      fetch("/save-data", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      })
+      .then(res => {
+        if (!res.ok) {
+          return res.json().then(err => {
+            throw new Error(err.detail || "Failed to save assessment");
+          });
+        }
+        return res.json();
+      })
+      .then(data => {
+        console.log("Saved:", data);
+        localStorage.setItem("session_id", userId);
+      })
+      .catch(err => {
+        console.error("Error saving data:", err);
+        alert("⚠️ Error saving assessment: " + err.message + "\nPlease try again or contact support.");
+      });
+    }
+
+    // --- Navigation ---
+    function goToDashboard() { window.location.href = "/static/dashboard.html"; }
+    function viewMyReport() { window.location.href = `/static/view.html?file=${userId}.json`; }
+
+    // --- Init ---
+    window.addEventListener("load", () => {
+      startWebcam();
+      showQuestion();
+    });
+  </script>
+</body>
+</html>

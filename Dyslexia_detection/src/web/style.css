@@ -1,0 +1,374 @@
+
+* {
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+body {  
+  margin: 0;  
+  padding: 0;
+  background: linear-gradient(135deg, #a8edea, #fed6e3);  
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;  
+  min-height: 100vh;
+  display: block;  
+  overflow-y: auto;
+  min-width: 1400px; /* Force desktop minimum width */
+  width: 100%;
+}
+
+/* Container - Fixed Desktop Width */
+.container {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-radius: 18px;
+  padding: 40px 60px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+  width: 1300px; /* Fixed desktop width */
+  margin: 40px auto;
+  text-align: left;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Headings & Paragraphs */
+h1 {
+  color: #222;
+  font-size: 32px;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+}
+
+h2 {
+  color: #333;
+  font-size: 24px;
+  margin-bottom: 15px;
+}
+
+p {
+  color: #555;
+  font-size: 16px;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* Input & Select - Fixed Desktop Width */
+input,
+select {
+  width: 600px; /* Fixed width for desktop */
+  padding: 14px 18px;
+  margin: 12px 0;
+  border: 2px solid #b5d0ff;
+  border-radius: 12px;
+  font-size: 16px;
+  outline: none;
+  transition: 0.2s ease-in-out;
+  display: block;
+}
+
+input:focus,
+select:focus {
+  border-color: #4a90e2;
+  box-shadow: 0 0 8px rgba(74, 144, 226, 0.4);
+}
+
+/* Buttons - Fixed Desktop Width */
+button {
+  width: auto;
+  min-width: 250px;
+  padding: 14px 30px;
+  margin-top: 20px;
+  margin-right: 15px;
+  font-size: 17px;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(90deg, #4a90e2, #0072ff);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+button:hover {
+  background: linear-gradient(90deg, #0072ff, #4a90e2);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.exit-btn {
+  min-width: 200px;
+  padding: 12px 25px;
+}
+
+/* Webcam Section - Fixed Desktop Size */
+.video-container {
+  width: 1000px; /* Fixed width */
+  height: 500px; /* Fixed height */
+  background: #f3f6fd;
+  border-radius: 15px;
+  overflow: hidden;
+  margin: 30px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 3px solid #b5d0ff;
+}
+
+video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 10px;
+}
+
+/* Assessment Questions - Fixed Desktop Width */
+.assessment {
+  width: 1000px; /* Fixed width */
+  margin: 0 auto;
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+.question-box {
+  background: linear-gradient(135deg, #c3eaff, #e0c3fc);
+  padding: 25px 30px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  line-height: 1.6;
+}
+
+/* Options - Horizontal Grid for Desktop */
+.options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr); /* 2 columns for desktop */
+  gap: 15px;
+  margin-top: 25px;
+  width: 100%;
+}
+
+.option-btn {
+  padding: 16px 20px;
+  font-size: 17px;
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #fff;
+  transition: 0.3s;
+  width: 100%;
+  text-align: center;
+}
+
+.option-btn:nth-child(1) {
+  background: #ffb6b9;
+}
+.option-btn:nth-child(2) {
+  background: #8ac6d1;
+}
+.option-btn:nth-child(3) {
+  background: #fcbad3;
+}
+.option-btn:nth-child(4) {
+  background: #b5ead7;
+}
+
+.option-btn:hover {
+  transform: scale(1.05);
+  filter: brightness(1.1);
+}
+
+.option-btn.correct {
+  background-color: #4caf50 !important;
+}
+
+.option-btn.incorrect {
+  background-color: #f44336 !important;
+}
+
+#nextBtn {
+  margin-top: 30px;
+  padding: 12px 30px;
+  border-radius: 10px;
+}
+
+/* Exit Button */
+#exitBtn {
+  width: auto;
+  min-width: 250px;
+  margin: 30px auto 0;
+  background: linear-gradient(90deg, #ff512f, #dd2476);
+  display: block;
+}
+
+#exitBtn:hover {
+  background: linear-gradient(90deg, #dd2476, #ff512f);
+  transform: scale(1.05);
+}
+
+/* Hidden Elements */
+.hidden {
+  display: none;
+}
+
+/* Tables - Fixed Desktop Width */
+table {
+  width: 100%;
+  min-width: 1200px;
+  border-collapse: collapse;
+  margin: 20px 0;
+  font-size: 14px;
+  background: white;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 12px;
+  text-align: left;
+}
+
+th {
+  background: #0057b8;
+  color: white;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+tr:hover {
+  background: #f5f5f5;
+}
+
+/* Admin page specific - Fixed Desktop Layout */
+.admin .container {
+  width: 1600px; /* Wider for admin table */
+  min-width: 1600px;
+  max-width: 1600px;
+  padding: 40px 50px;
+}
+
+.admin table {
+  min-width: 1400px;
+  width: 100%;
+}
+
+/* Desktop-specific: Prevent mobile responsive behavior */
+* {
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+}
+
+/* Force horizontal layout - no wrapping */
+.fade-in {
+  animation: fadeIn 0.6s ease-in-out;
+}
+
+/* Question Section - Fixed Width */
+#question-section {
+  width: 1000px;
+  margin: 0 auto;
+}
+
+#question-container {
+  width: 100%;
+}
+
+/* Stats boxes for admin - Horizontal layout */
+.stats {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 30px;
+  flex-wrap: nowrap; /* Don't wrap on desktop */
+}
+
+.stat-box {
+  background: #f0f0f0;
+  padding: 20px 30px;
+  border-radius: 8px;
+  min-width: 200px;
+  flex: 1;
+}
+
+.stat-box h3 {
+  margin: 0 0 10px 0;
+  color: #0057b8;
+  font-size: 16px;
+}
+
+.stat-box p {
+  margin: 0;
+  font-size: 32px;
+  font-weight: bold;
+}
+
+/* Search input - Desktop width */
+#search {
+  width: 100%;
+  max-width: 800px;
+  padding: 12px 18px;
+  font-size: 16px;
+  border: 2px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+/* Risk colors */
+.risk-high { 
+  color: red; 
+  font-weight: bold; 
+  font-size: 16px;
+}
+
+.risk-medium { 
+  color: orange; 
+  font-weight: bold; 
+  font-size: 16px;
+}
+
+.risk-low { 
+  color: green; 
+  font-weight: bold; 
+  font-size: 16px;
+}
+
+/* View button */
+.view-btn {
+  background: #0057b8;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.view-btn:hover {
+  background: #004494;
+}
+
+/* Prevent any responsive behavior */
+@media screen {
+  /* Override any responsive rules */
+  body {
+    min-width: 1400px !important;
+  }
+  
+  .container {
+    width: 1300px !important;
+    min-width: 1300px !important;
+    max-width: 1300px !important;
+  }
+}

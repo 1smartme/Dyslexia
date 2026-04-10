@@ -1,0 +1,2 @@
+session_id,n_gaze_samples,n_fixations,fixation_mean_dur,fixation_std_dur,n_saccades,saccade_mean_amp,saccade_mean_vel,regressions_count,scanpath_entropy,reading_speed_wpm,total_reading_time_ms,accuracy,errors_count,stt_confidence
+sess_1762706188991,0,0,0.0,0.0,0,0.0,0.0,0,0.0,16.207916287534122,70336,0.0,3,0.0

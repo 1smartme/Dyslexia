@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    /* Clean Desktop Table - All Columns Horizontal */
+    body.admin {
+      min-width: 1600px;
+      overflow-x: auto;
+    }
+    
+    .admin .container {
+      width: 1600px;
+      min-width: 1600px;
+      max-width: 1600px;
+      padding: 40px 50px;
+    }
+    
+    .stats {
+      display: flex;
+      gap: 25px;
+      margin-bottom: 30px;
+      flex-wrap: nowrap;
+    }
+    
+    .stat-box {
+      background: linear-gradient(135deg, #f0f0f0, #e8e8e8);
+      padding: 20px 30px;
+      border-radius: 8px;
+      min-width: 180px;
+      flex: 1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .stat-box h3 {
+      margin: 0 0 10px 0;
+      color: #0057b8;
+      font-size: 16px;
+      font-weight: 600;
+    }
+    
+    .stat-box p {
+      margin: 0;
+      font-size: 36px;
+      font-weight: bold;
+    }
+    
+    #search {
+      width: 100%;
+      max-width: 600px;
+      padding: 12px 18px;
+      margin-bottom: 20px;
+      font-size: 16px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+    }
+    
+    /* Table - Clean Desktop Layout */
+    .table-wrapper {
+      width: 100%;
+      overflow-x: auto;
+      margin: 20px 0;
+    }
+    
+    table {
+      width: 100%;
+      min-width: 1500px;
+      border-collapse: collapse;
+      background: white;
+      font-size: 13px;
+      table-layout: fixed;
+    }
+    
+    th, td {
+      border: 1px solid #ddd;
+      padding: 12px 10px;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    
+    th {
+      background: #0057b8;
+      color: white;
+      font-weight: 600;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    
+    /* Fixed column widths - all 11 columns */
+    th:nth-child(1), td:nth-child(1) { width: 140px; } /* Student */
+    th:nth-child(2), td:nth-child(2) { width: 60px; }  /* Age */
+    th:nth-child(3), td:nth-child(3) { width: 70px; }  /* Grade */
+    th:nth-child(4), td:nth-child(4) { width: 90px; }  /* Score */
+    th:nth-child(5), td:nth-child(5) { width: 100px; }  /* Accuracy */
+    th:nth-child(6), td:nth-child(6) { width: 110px; } /* Risk */
+    th:nth-child(7), td:nth-child(7) { width: 110px; } /* Risk Score */
+    th:nth-child(8), td:nth-child(8) { width: 110px; } /* Confidence */
+    th:nth-child(9), td:nth-child(9) { width: 140px; } /* Method */
+    th:nth-child(10), td:nth-child(10) { width: 170px; } /* Date */
+    th:nth-child(11), td:nth-child(11) { width: 100px; } /* Actions */
+    
+    tr:hover {
+      background: #f5f5f5;
+    }
+    
+    .risk-high { 
+      color: red; 
+      font-weight: bold; 
+      font-size: 14px;
+    }
+    
+    .risk-medium { 
+      color: orange; 
+      font-weight: bold; 
+      font-size: 14px;
+    }
+    
+    .risk-low { 
+      color: green; 
+      font-weight: bold; 
+      font-size: 14px;
+    }
+    
+    .view-btn {
+      background: #0057b8;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      border-radius: 4px;
+      font-size: 12px;
+    }
+    
+    .view-btn:hover {
+      background: #004494;
+    }
+    
+    .exit-btn {
+      min-width: 150px;
+      padding: 12px 25px;
+    }
+  </style>
+</head>
+
+<body class="admin">
+<div class="container">
+  <h2>📊 Dyslexia Assessment Results (Admin Dashboard)</h2>
+
+  <div class="stats" id="stats">
+    <div class="stat-box">
+      <h3>Total Assessments</h3>
+      <p id="totalCount">0</p>
+    </div>
+    <div class="stat-box">
+      <h3>High Risk</h3>
+      <p id="highRisk" class="risk-high">0</p>
+    </div>
+    <div class="stat-box">
+      <h3>Medium Risk</h3>
+      <p id="mediumRisk" class="risk-medium">0</p>
+    </div>
+    <div class="stat-box">
+      <h3>Low Risk</h3>
+      <p id="lowRisk" class="risk-low">0</p>
+    </div>
+  </div>
+
+  <input type="text" id="search" placeholder="🔍 Search by name, age, grade, or risk..." />
+
+  <div class="table-wrapper">
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Student Name</th>
+          <th>Age</th>
+          <th>Grade</th>
+          <th>Score</th>
+          <th>Accuracy %</th>
+          <th>Risk Level</th>
+          <th>Risk Score</th>
+          <th>Confidence</th>
+          <th>Method</th>
+          <th>Date & Time</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <div style="margin-top: 20px; display: flex; gap: 10px;">
+    <button id="exportBtn" class="exit-btn">📥 Export CSV</button>
+    <button id="refreshBtn" class="exit-btn" onclick="loadResults()">🔄 Refresh</button>
+  </div>
+</div>
+
+<script>
+  let allResults = [];
+
+  async function loadResults() {
+    try {
+      const res = await fetch("/list-results", {
+        headers: { "X-Admin": "true" }
+      });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+
+      const data = await res.json();
+      console.log("Loaded", data.length, "results");
+      allResults = data;
+      render(data);
+      updateStats(data);
+    } catch (error) {
+      console.error("Error loading results:", error);
+      document.querySelector("#resultsTable tbody").innerHTML = `
+        <tr>
+          <td colspan="11" style="color: red; padding: 20px;">
+            ❌ Error loading results: ${error.message}<br>
+            Make sure the backend server is running
+          </td>
+        </tr>
+      `;
+    }
+  }
+
+  function updateStats(data) {
+    const total = data.length;
+    const high = data.filter(d => d.risk === "High").length;
+    const medium = data.filter(d => d.risk === "Medium").length;
+    const low = data.filter(d => d.risk === "Low").length;
+
+    document.getElementById("totalCount").textContent = total;
+    document.getElementById("highRisk").textContent = high;
+    document.getElementById("mediumRisk").textContent = medium;
+    document.getElementById("lowRisk").textContent = low;
+  }
+
+  function render(data) {
+    const tbody = document.querySelector("#resultsTable tbody");
+    
+    if (data.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="11" style="padding: 20px; text-align: center; color: #666;">
+            No assessment results found. Students need to complete assessments first.
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    tbody.innerHTML = data.map(d => {
+      const accuracy = d.total > 0 ? ((d.correct / d.total) * 100).toFixed(1) : "0.0";
+      const riskClass = d.risk === "High" ? "risk-high" : (d.risk === "Medium" ? "risk-medium" : "risk-low");
+      const riskScore = d.risk_score !== undefined && d.risk_score !== null ? (d.risk_score * 100).toFixed(1) + "%" : "N/A";
+      const confidence = d.confidence !== undefined && d.confidence !== null ? (d.confidence * 100).toFixed(1) + "%" : "N/A";
+      const method = d.method || d.detection_method || "N/A";
+      const date = d.timestamp || d.date || "N/A";
+      const shortDate = date.length > 16 ? date.substring(0, 16) : date;
+      
+      return `
+        <tr>
+          <td style="text-align: left; font-weight: 600;">${d.name || "Unknown"}</td>
+          <td>${d.age || "-"}</td>
+          <td>${d.grade || "-"}</td>
+          <td><strong>${d.correct || 0}/${d.total || 0}</strong></td>
+          <td><strong>${accuracy}%</strong></td>
+          <td class="${riskClass}">${d.risk || "Unknown"}</td>
+          <td>${riskScore}</td>
+          <td>${confidence}</td>
+          <td style="font-size: 12px;">${method}</td>
+          <td style="font-size: 12px;">${shortDate}</td>
+          <td>
+            <button class="view-btn" onclick="viewDetails('${d.file || d.session_id || ""}')">
+              View
+            </button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  async function viewDetails(fileName) {
+    if (!fileName) {
+      alert("No file information available");
+      return;
+    }
+    
+    try {
+      const res = await fetch(`/result/${fileName}?X-Admin=true`, {
+        headers: { "X-Admin": "true" }
+      });
+      
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
+      
+      const data = await res.json();
+      
+      const detailsWindow = window.open("", "_blank", "width=900,height=700");
+      detailsWindow.document.write(`
+        <html>
+          <head>
+            <title>Assessment Details - ${data.name || "Unknown"}</title>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+              h1 { color: #0057b8; }
+              .section { margin: 20px 0; padding: 15px; background: white; border-radius: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+              .metric { display: inline-block; margin: 10px 20px 10px 0; }
+              .metric strong { color: #0057b8; }
+              .risk-high { color: red; font-weight: bold; }
+              .risk-medium { color: orange; font-weight: bold; }
+              .risk-low { color: green; font-weight: bold; }
+              pre { background: #fff; padding: 10px; border-radius: 5px; overflow-x: auto; border: 1px solid #ddd; }
+            </style>
+          </head>
+          <body>
+            <h1>📊 Assessment Details</h1>
+            
+            <div class="section">
+              <h2>Student Information</h2>
+              <div class="metric"><strong>Name:</strong> ${data.name || "Unknown"}</div>
+              <div class="metric"><strong>Age:</strong> ${data.age || "-"}</div>
+              <div class="metric"><strong>Grade:</strong> ${data.grade || "-"}</div>
+              <div class="metric"><strong>Date:</strong> ${data.timestamp || "N/A"}</div>
+            </div>
+            
+            <div class="section">
+              <h2>Assessment Results</h2>
+              <div class="metric"><strong>Score:</strong> ${data.score || 0}/${data.total || 0}</div>
+              <div class="metric"><strong>Accuracy:</strong> ${data.accuracy || 0}%</div>
+              <div class="metric"><strong>Risk:</strong> <span class="risk-${(data.risk || "low").toLowerCase()}">${data.risk || "Unknown"}</span></div>
+            </div>
+            
+            ${data.ml_detection ? `
+            <div class="section">
+              <h2>ML Detection Results</h2>
+              <div class="metric"><strong>Risk Score:</strong> ${(data.ml_detection.risk_score * 100).toFixed(1)}%</div>
+              <div class="metric"><strong>Confidence:</strong> ${(data.ml_detection.confidence * 100).toFixed(1)}%</div>
+              <div class="metric"><strong>Method:</strong> ${data.ml_detection.method || "N/A"}</div>
+              ${data.ml_detection.reason ? `<div class="metric"><strong>Reason:</strong> ${data.ml_detection.reason}</div>` : ""}
+            </div>
+            ` : ""}
+            
+            ${data.fixation_stats ? `
+            <div class="section">
+              <h2>Eye Tracking Metrics</h2>
+              <div class="metric"><strong>Fixation Mean Duration:</strong> ${data.fixation_stats.mean_duration?.toFixed(1) || "N/A"}ms</div>
+              <div class="metric"><strong>Fixation Count:</strong> ${data.fixation_stats.count || 0}</div>
+              <div class="metric"><strong>Regressions:</strong> ${data.regressions?.count || 0}</div>
+              <div class="metric"><strong>Reading Speed:</strong> ${data.reading_speed_wpm?.toFixed(1) || "N/A"} WPM</div>
+              <div class="metric"><strong>Scanpath Entropy:</strong> ${data.scanpath_entropy?.toFixed(2) || "N/A"}</div>
+            </div>
+            ` : ""}
+            
+            <div class="section">
+              <h2>Full Data (JSON)</h2>
+              <pre>${JSON.stringify(data, null, 2)}</pre>
+            </div>
+          </body>
+        </html>
+      `);
+    } catch (error) {
+      alert(`Error loading details: ${error.message}`);
+    }
+  }
+
+  // Search functionality
+  document.getElementById("search").oninput = e => {
+    const val = e.target.value.toLowerCase();
+    const filtered = allResults.filter(d => {
+      const name = (d.name || "").toLowerCase();
+      const age = String(d.age || "").toLowerCase();
+      const grade = String(d.grade || "").toLowerCase();
+      const risk = (d.risk || "").toLowerCase();
+      return name.includes(val) || age.includes(val) || grade.includes(val) || risk.includes(val);
+    });
+    render(filtered);
+    updateStats(filtered);
+  };
+
+  // Export CSV
+  document.getElementById("exportBtn").onclick = () => {
+    const rows = [["Name", "Age", "Grade", "Score", "Total", "Accuracy", "Risk", "Risk Score", "Confidence", "Method", "Date"]];
+    
+    allResults.forEach(d => {
+      const accuracy = d.total > 0 ? ((d.correct / d.total) * 100).toFixed(1) : "0.0";
+      const riskScore = d.risk_score !== undefined && d.risk_score !== null ? (d.risk_score * 100).toFixed(1) + "%" : "N/A";
+      const confidence = d.confidence !== undefined && d.confidence !== null ? (d.confidence * 100).toFixed(1) + "%" : "N/A";
+      const method = d.method || d.detection_method || "N/A";
+      
+      rows.push([
+        d.name || "Unknown",
+        d.age || "-",
+        d.grade || "-",
+        d.correct || 0,
+        d.total || 0,
+        accuracy + "%",
+        d.risk || "Unknown",
+        riskScore,
+        confidence,
+        method,
+        d.timestamp || d.date || "N/A"
+      ]);
+    });
+
+    const csv = rows.map(r => r.map(cell => `"${cell}"`).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `dyslexia_results_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+  };
+
+  // Load on page load
+  loadResults();
+</script>
+</body>
+</html>

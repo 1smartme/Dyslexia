@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dyslexia Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+    th { background: #0057b8; color: white; }
+    tr:hover { background: #f1f1f1; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>📊 Your Dyslexia Assessment Result</h2>
+    <table id="resultsTable">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Age</th>
+          <th>Correct</th>
+          <th>Total</th>
+          <th>Risk</th>
+          <th>View</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <script>
+    async function loadResults() {
+      // Try sessionStorage first (where assessment stores it), then localStorage
+      let sessionId = sessionStorage.getItem("user_id") || localStorage.getItem("session_id");
+      if (!sessionId) {
+        alert("No assessment found. Please take the test first.");
+        window.location.href = "/static/index.html";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/my-result/${sessionId}`);
+        if (!res.ok) {
+          alert("Could not load your result.");
+          return;
+        }
+        const d = await res.json();
+
+        const tbody = document.querySelector("#resultsTable tbody");
+        tbody.innerHTML = `
+          <tr>
+            <td>${d.name}</td>
+            <td>${d.age}</td>
+            <td>${d.score}</td>
+            <td>${d.total}</td>
+            <td style="color:${d.risk === 'High' ? 'red' : 'green'}">${d.risk}</td>
+            <td><a href="view.html?file=${d.session_id}.json">Open</a></td>
+          </tr>
+        `;
+      } catch (err) {
+        console.error(err);
+        alert("Unexpected error loading your result.");
+      }
+    }
+
+    loadResults();
+  </script>
+</body>
+</html>

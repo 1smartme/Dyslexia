@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dyslexia Screening | Start</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>Dyslexia Screening</h1>
+    <p>Please enter your details to begin the assessment.</p>
+
+    <input type="text" id="name" placeholder="Full Name" required />
+    <input type="number" id="age" placeholder="Age" required />
+    
+    <select id="grade" required>
+      <option value="">Select Grade</option>
+      <option value="1">1</option>
+      <option value="2">2</option>
+      <option value="3">3</option>
+      <option value="4">4</option>
+      <option value="5">5</option>
+      <option value="6">6</option>
+      <option value="7">7</option>
+    </select>
+
+    <button id="startBtn">Start Assessment</button>
+    
+    <div style="margin-top: 20px; text-align: center;">
+      <a href="admin.html" style="color: #0057b8; text-decoration: none; font-size: 14px;">
+        👨‍💼 Admin Dashboard
+      </a>
+    </div>
+  </div>
+
+  <script>
+    const startBtn = document.getElementById("startBtn");
+
+    startBtn.addEventListener("click", () => {
+      const name = document.getElementById("name").value.trim();
+      const age = document.getElementById("age").value.trim();
+      const grade = document.getElementById("grade").value;
+
+      if (!name || !age || !grade) {
+        alert("Please fill in all details!");
+        return;
+      }
+
+      // Save student info in localStorage
+      const studentInfo = { name, age, grade };
+      localStorage.setItem("studentInfo", JSON.stringify(studentInfo));
+
+      // Redirect to calibration page
+      window.location.href = "calibration.html";
+    });
+  </script>
+</body>
+</html>

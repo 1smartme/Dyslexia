@@ -1,0 +1,77 @@
+{
+  "session_id": "d7fe7920-fdf3-49fa-9d5c-1e4efc942cd2",
+  "session_file": "session_20260110_015857.json",
+  "name": "Manav",
+  "age": "7",
+  "grade": "2",
+  "score": 1,
+  "total": 4,
+  "accuracy": 25.0,
+  "risk": "High",
+  "timestamp": "2026-01-10 01:58:57",
+  "server_timestamp": "2026-01-10T01:58:57.330037",
+  "ml_detection": {
+    "risk": "High",
+    "risk_score": 0.8,
+    "confidence": 0.9,
+    "method": "hard_rule_accuracy_errors",
+    "prediction": 1,
+    "feature_importance": {},
+    "reason": "Low accuracy (25.0%) with 3 errors",
+    "assessment_summary": {
+      "score": 1,
+      "total": 4,
+      "accuracy_percent": 25.0,
+      "errors_count": 3,
+      "fixation_mean_dur_ms": 6085.666666666667,
+      "regressions_count": 1,
+      "reading_speed_wpm": 117.23217689668319,
+      "scanpath_entropy": 0
+    }
+  },
+  "fixation_stats": {
+    "mean_duration": 6085.666666666667,
+    "std_duration": 7303.779904192684,
+    "count": 3
+  },
+  "saccade_stats": {
+    "mean_amplitude": 0.0024369550331189574,
+    "mean_velocity": 0.25984554686414524,
+    "count": 56
+  },
+  "regressions": {
+    "count": 1,
+    "timestamps": [
+      1767990518104
+    ]
+  },
+  "scanpath_entropy": 0,
+  "reading_speed_wpm": 117.23217689668319,
+  "total_reading_time_ms": 21801,
+  "errors_count": 3,
+  "device_type": "Desktop",
+  "screen_resolution": "1536x864",
+  "language": "en-US",
+  "server_derived_features": {
+    "session_id": "d7fe7920-fdf3-49fa-9d5c-1e4efc942cd2",
+    "n_gaze_samples": 333,
+    "n_fixations": 1,
+    "fixation_mean_dur": 19513.0,
+    "fixation_median_dur": 19513.0,
+    "fixation_std_dur": 0.0,
+    "n_saccades": 0,
+    "saccade_mean_amp": 0.0,
+    "saccade_std_amp": 0.0,
+    "saccade_mean_vel": 0.0,
+    "regressions_count": 0,
+    "scanpath_entropy": 0.0,
+    "reading_speed_wpm": 0.0,
+    "total_reading_time_ms": 20984,
+    "accuracy": null,
+    "errors_count": null,
+    "stt_confidence": null,
+    "screen_w": null,
+    "screen_h": null,
+    "device_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+  }
+}

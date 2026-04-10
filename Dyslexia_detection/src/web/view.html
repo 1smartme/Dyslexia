@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dyslexia Report</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>📄 Dyslexia Screening Report</h1>
+    <div id="reportContent">
+      <p>Loading report...</p>
+    </div>
+    <button style="margin-top: 20px;" onclick="goBack()">Back to Dashboard</button>
+  </div>
+
+  <script>
+    function goBack() {
+      window.location.href = "/static/dashboard.html";
+    }
+
+    async function loadReport() {
+      // Use the student's session ID
+      const userId = sessionStorage.getItem("user_id");
+      if (!userId) {
+        document.getElementById("reportContent").innerHTML =
+          "<p>No session found. Please take the assessment first.</p>";
+        return;
+      }
+
+      try {
+        const res = await fetch(`/my-result/${userId}`);
+        if (!res.ok) {
+          const err = await res.json();
+          document.getElementById("reportContent").innerHTML =
+            `<p style="color:red;">Error loading report: ${err.detail || res.status}</p>`;
+          return;
+        }
+        const data = await res.json();
+
+        const riskText =
+          data.risk === "High"
+            ? "This screening indicates a higher risk for dyslexia. We recommend consulting a specialist or school counselor for a full evaluation."
+            : "This screening suggests a low risk for dyslexia. If you still have concerns, consider discussing them with a teacher or specialist.";
+
+        document.getElementById("reportContent").innerHTML = `
+          <p><strong>Student:</strong> ${data.name || "Unknown"}</p>
+          <p><strong>Age:</strong> ${data.age || "N/A"}</p>
+          <p><strong>Score:</strong> ${data.score} / ${data.total}</p>
+          <p><strong>Risk Level:</strong> ${data.risk}</p>
+          <hr />
+          <p>${riskText}</p>
+          <hr />
+          <p><strong>Session time:</strong> ${data.timestamp || data.server_timestamp || "N/A"}</p>
+        `;
+      } catch (e) {
+        console.error(e);
+        document.getElementById("reportContent").innerHTML =
+          "<p style='color:red;'>Unexpected error loading report.</p>";
+      }
+    }
+
+    loadReport();
+  </script>
+</body>
+</html>

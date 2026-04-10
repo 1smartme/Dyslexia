@@ -1,0 +1,98 @@
+{
+  "session_id": "4d4a78f5-2217-4299-88cf-bcb2873ab3b7",
+  "session_file": "session_20260114_140220.json",
+  "name": "Rushi",
+  "age": "12",
+  "grade": "7",
+  "score": 2,
+  "total": 4,
+  "accuracy": 50.0,
+  "risk": "Low",
+  "timestamp": "2026-01-14 14:02:20",
+  "server_timestamp": "2026-01-14T14:02:21.316100",
+  "ml_detection": {
+    "risk": "Low",
+    "risk_score": 0.024478982790160433,
+    "confidence": 0.9755210172098395,
+    "method": "ml",
+    "prediction": 0,
+    "feature_importance": {
+      "num__age": 0.00032519881934569216,
+      "num__grade": 0.0004533260927528834,
+      "num__family_history": 0.0,
+      "num__calibration_quality": 0.0,
+      "num__reading_speed": 0.001619533377692068,
+      "num__accuracy": 0.9053004067637261,
+      "num__fixation_mean_dur": 0.0038933096900096538,
+      "num__fixation_count": 0.0026661897267884075,
+      "num__saccade_mean_amp": 0.00011134880517589044,
+      "num__regressions_count": 0.07765937064598581,
+      "num__scanpath_entropy": 0.0006968395152063975,
+      "num__total_reading_time": 0.003907322000268043,
+      "num__errors_count": 0.003367154563048948,
+      "cat__language_English": 0.0,
+      "cat__language_Hindi": 0.0,
+      "cat__language_Marathi": 0.0,
+      "cat__device_type_Laptop": 0.0,
+      "cat__device_type_Tablet": 0.0
+    },
+    "reason": "ML/Statistical analysis",
+    "assessment_summary": {
+      "score": 2,
+      "total": 4,
+      "accuracy_percent": 50.0,
+      "errors_count": 2,
+      "fixation_mean_dur_ms": 1253.3333333333333,
+      "regressions_count": 3,
+      "reading_speed_wpm": 222.68489182583505,
+      "scanpath_entropy": 1.5779486105013163
+    }
+  },
+  "fixation_stats": {
+    "mean_duration": 1253.3333333333333,
+    "std_duration": 830.2506984171841,
+    "count": 6
+  },
+  "saccade_stats": {
+    "mean_amplitude": 0.005962711814201388,
+    "mean_velocity": 0.3686036343157332,
+    "count": 104
+  },
+  "regressions": {
+    "count": 3,
+    "timestamps": [
+      1768379532933,
+      1768379534633,
+      1768379537899
+    ]
+  },
+  "scanpath_entropy": 1.5779486105013163,
+  "reading_speed_wpm": 222.68489182583505,
+  "total_reading_time_ms": 11881,
+  "errors_count": 2,
+  "device_type": "Desktop",
+  "screen_resolution": "1536x864",
+  "language": "en-US",
+  "server_derived_features": {
+    "session_id": "4d4a78f5-2217-4299-88cf-bcb2873ab3b7",
+    "n_gaze_samples": 303,
+    "n_fixations": 1,
+    "fixation_mean_dur": 9738.0,
+    "fixation_median_dur": 9738.0,
+    "fixation_std_dur": 0.0,
+    "n_saccades": 0,
+    "saccade_mean_amp": 0.0,
+    "saccade_std_amp": 0.0,
+    "saccade_mean_vel": 0.0,
+    "regressions_count": 0,
+    "scanpath_entropy": 1.5767519993421686,
+    "reading_speed_wpm": 0.0,
+    "total_reading_time_ms": 11047,
+    "accuracy": null,
+    "errors_count": null,
+    "stt_confidence": null,
+    "screen_w": null,
+    "screen_h": null,
+    "device_agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+  }
+}

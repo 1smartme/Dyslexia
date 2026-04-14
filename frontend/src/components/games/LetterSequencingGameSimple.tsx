@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Clock, Brain, Shuffle } from 'lucide-react'
+import { Clock, Brain } from 'lucide-react'
 import { gameConfigs, GameLevel } from '../../lib/gameConfig'
 import LevelSelector from './LevelSelector'
 
@@ -18,9 +18,7 @@ const LetterSequencingGameSimple: React.FC = () => {
   const [gameStartTime, setGameStartTime] = useState<number>(0)
   const navigate = useNavigate()
 
-  const mirrorEligible = ['b', 'd', 'p', 'q', 'm', 'w']
-  
-  const gameConfig = gameConfigs['letter-sequencing']
+  const gameConfig = gameConfigs['letter-sequencing-learning']
 
   const wordSets = {
     beginner: ['cat', 'dog', 'sun', 'car', 'run', 'big', 'red', 'hat', 'cup', 'pen'],
@@ -175,9 +173,15 @@ const LetterSequencingGameSimple: React.FC = () => {
                 </div>
               </div>
             </div>
-            <div className="flex gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
               <button onClick={() => window.location.reload()} className="btn btn-primary">
                 Play Again
+              </button>
+              <button onClick={() => navigate('/games')} className="btn btn-default">
+                Explore More Games
+              </button>
+              <button onClick={() => navigate('/profile')} className="btn btn-outline">
+                View Profile
               </button>
               <button onClick={handleBack} className="btn btn-outline">
                 Back to Games

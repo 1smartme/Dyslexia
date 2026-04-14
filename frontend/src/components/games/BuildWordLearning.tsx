@@ -37,7 +37,7 @@ const BuildWordLearning: React.FC = () => {
     timeLeft: 15,
     difficulty: 'easy'
   })
-  const [savingScore, setSavingScore] = useState(false)
+  const [, setSavingScore] = useState(false)
   const [scoreSaved, setScoreSaved] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
 

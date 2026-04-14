@@ -19,7 +19,7 @@ export interface SendDyslexiaSessionDataArgs {
   timestamp?: string
 }
 
-export async function sendDyslexiaSessionData(args: SendDyslexiaSessionDataArgs) {
+const buildDyslexiaPayload = (args: SendDyslexiaSessionDataArgs) => {
   const total = Number(args.total)
   const score = Number(args.score)
 
@@ -52,6 +52,27 @@ export async function sendDyslexiaSessionData(args: SendDyslexiaSessionDataArgs)
     timestamp: args.timestamp || new Date().toISOString(),
   }
 
+  return payload
+}
+
+export async function saveDyslexiaSessionData(args: SendDyslexiaSessionDataArgs) {
+  const payload = buildDyslexiaPayload(args)
+  const res = await fetch(`${API_BASE}/dyslexia/sessions`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  })
+
+  if (!res.ok) {
+    const details = await res.text().catch(() => '')
+    throw new Error(`saveDyslexiaSessionData failed: ${res.status} ${details}`)
+  }
+
+  return res.json()
+}
+
+export async function sendDyslexiaSessionData(args: SendDyslexiaSessionDataArgs) {
+  const payload = buildDyslexiaPayload(args)
   console.log('[dyslexia] payload before sending', payload)
 
   const res = await fetch(`${API_BASE}/dyslexia/analyze`, {

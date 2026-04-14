@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { Brain, ArrowLeft, Users, TrendingUp, Clock, Star, Trophy, Target, Plus, User, BarChart3, Moon, Sun } from 'lucide-react'
+import { Brain, ArrowLeft, Users, TrendingUp, Trophy, Plus, User, BarChart3, Moon, Sun } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { useTheme } from '../contexts/ThemeContext'
 import { getLearningProfile, getStreakBadge } from '../lib/learningProgress'
@@ -67,17 +67,6 @@ const ParentDashboard: React.FC = () => {
     setNewChildEmail('')
     setShowAddChild(false)
     setSelectedChild(newChild)
-  }
-
-  const removeChild = (childId: string) => {
-    const updatedChildren = children.filter(child => child.id !== childId)
-    setChildren(updatedChildren)
-    if (user?.email) {
-      localStorage.setItem(`parent_children_${user.email}`, JSON.stringify(updatedChildren))
-    }
-    if (selectedChild?.id === childId) {
-      setSelectedChild(updatedChildren[0] || null)
-    }
   }
 
   return (
@@ -250,7 +239,6 @@ const ParentDashboard: React.FC = () => {
                       { days: 150, emoji: '👑', name: 'Golden', color: '#F59E0B' }
                     ].map(badge => {
                       const earned = childProgress.dailyStreak >= badge.days
-                      const progress = Math.min(childProgress.dailyStreak / badge.days, 1)
                       return (
                         <div key={badge.days} className="flex items-center space-x-4">
                           <div className={`text-2xl ${earned ? '' : 'grayscale opacity-50'}`}>

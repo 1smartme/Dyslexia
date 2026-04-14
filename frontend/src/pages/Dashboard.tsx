@@ -1,6 +1,5 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
-import { motion } from 'framer-motion'
 import {
   Brain,
   BookOpen,
@@ -11,12 +10,10 @@ import {
   Play,
   User,
   LogOut,
-  BarChart3,
   Eye,
   Volume2,
   Zap,
   Search,
-  Layers,
   GraduationCap,
   Users,
   Moon,

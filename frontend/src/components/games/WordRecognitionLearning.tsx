@@ -44,9 +44,10 @@ const WordRecognitionLearning: React.FC = () => {
     totalReactionTime: 0,
     sessionStartTime: Date.now()
   })
-  const [savingScore, setSavingScore] = useState(false)
+  const [, setSavingScore] = useState(false)
   const [scoreSaved, setScoreSaved] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const emojiLookup = Object.fromEntries(
     (['easy', 'medium', 'hard'] as const)
       .flatMap(diff => getGameContent(diff).map(item => [item.word, item.image]))
@@ -60,8 +61,7 @@ const WordRecognitionLearning: React.FC = () => {
     const adaptiveDiff = getAdaptiveDifficulty(user.email || '', 'wordRecognition')
     const contentPool = getGameContent(gameState.difficulty)
     const pool = contentPool.map(item => item.word)
-    const wordItem = pool[Math.floor(Math.random() * pool.length)]
-    const word = wordItem.word
+    const word = pool[Math.floor(Math.random() * pool.length)]
     const settings = {
       easy: { optionsCount: 3 },
       medium: { optionsCount: 5 },
@@ -71,7 +71,7 @@ const WordRecognitionLearning: React.FC = () => {
     const usedWords = new Set([word])
     
     while (options.length < settings.optionsCount) {
-      const randomWord = pool[Math.floor(Math.random() * pool.length)].word
+      const randomWord = pool[Math.floor(Math.random() * pool.length)]
       if (!usedWords.has(randomWord)) {
         options.push(randomWord)
         usedWords.add(randomWord)
@@ -110,7 +110,7 @@ const WordRecognitionLearning: React.FC = () => {
   }
 
   const handleWordSelect = (index: number) => {
-    if (gameState.selectedIndex !== null) return
+    if (gameState.selectedIndex !== null || isTransitioning) return
     
     const isCorrect = index === gameState.correctIndex
     const reactionTime = Date.now() - gameState.startTime
@@ -143,6 +143,7 @@ const WordRecognitionLearning: React.FC = () => {
       speakText(`Not quite. The correct word was ${gameState.currentWord}`)
     }
     
+    setIsTransitioning(true)
     setTimeout(() => {
       if (gameState.round >= maxRounds) {
         setGameState(prev => ({ ...prev, gameOver: true }))
@@ -150,6 +151,7 @@ const WordRecognitionLearning: React.FC = () => {
         setGameState(prev => ({ ...prev, round: prev.round + 1 }))
         generateRound()
       }
+      setIsTransitioning(false)
     }, 2000)
   }
 
@@ -181,6 +183,7 @@ const WordRecognitionLearning: React.FC = () => {
       sessionStartTime: Date.now()
     })
     setHasStarted(false)
+    setIsTransitioning(false)
   }
 
   useEffect(() => {
@@ -202,6 +205,7 @@ const WordRecognitionLearning: React.FC = () => {
     }))
     setScoreSaved(false)
     setHasStarted(true)
+    setIsTransitioning(false)
     window.setTimeout(() => generateRound(), 0)
   }
 
@@ -211,14 +215,24 @@ const WordRecognitionLearning: React.FC = () => {
     const saveScore = async () => {
       setSavingScore(true)
       try {
+        const mult = DIFFICULTY_SETTINGS[gameState.difficulty].scoreMultiplier
+        const correctAnswers = Math.min(
+          maxRounds,
+          Math.round(gameState.score / Math.max(0.001, mult))
+        )
         await saveGameScore({
           userId: String(user.id),
           gameName: 'word_recognition',
           difficulty: gameState.difficulty.toString(),
-          accuracy: gameState.score / maxRounds,
+          accuracy: maxRounds ? gameState.score / (maxRounds * mult) : 0,
           avgResponseTime: gameState.totalReactionTime / Math.max(1, maxRounds),
           errors: {},
-          score: gameState.score
+          score: gameState.score,
+          sessionSummary: {
+            gameType: 'word_recognition',
+            correct: correctAnswers,
+            total: maxRounds,
+          },
         })
       } catch (error) {
         console.error('Failed to save word recognition score:', error)

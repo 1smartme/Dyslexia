@@ -22,7 +22,7 @@ export function useAdaptiveEngine(initialDifficulty = 1) {
       // Enhanced neurological analysis
       if (payload.userId) {
         const analysis = await analyzeGamePerformance({
-          userId: payload.userId,
+          userId: String(payload.userId),
           game: payload.gameName,
           score: payload.accuracy,
           timeTaken: payload.avgResponseTime,
@@ -35,7 +35,7 @@ export function useAdaptiveEngine(initialDifficulty = 1) {
       await saveGameScore({
         userId: payload.userId || 'anonymous',
         gameName: payload.gameName,
-        difficulty,
+        difficulty: String(difficulty),
         accuracy: payload.accuracy,
         avgResponseTime: payload.avgResponseTime,
         errors: payload.errors

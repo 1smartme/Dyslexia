@@ -8,7 +8,6 @@ import {
   BarChart3, 
   FileText, 
   TrendingUp,
-  AlertTriangle,
   CheckCircle,
   Clock,
   User,

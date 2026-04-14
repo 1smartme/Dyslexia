@@ -107,7 +107,7 @@ const OddOneOutLearning: React.FC = () => {
     difficulty: 'medium',
     timeLeft: 15
   })
-  const [savingScore, setSavingScore] = useState(false)
+  const [, setSavingScore] = useState(false)
   const [scoreSaved, setScoreSaved] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
   const [usedGroups, setUsedGroups] = useState<Set<number>>(new Set())
@@ -146,11 +146,11 @@ const OddOneOutLearning: React.FC = () => {
     // Keep legacy groups as fallback so existing behavior remains stable.
     let availableGroups = [generatedGroup, ...wordGroups]
     if (level <= 2) {
-      availableGroups = [generatedGroup, ...wordGroups.filter(g => g.pattern.every(word => word.length <= 4))]
+      availableGroups = [generatedGroup, ...wordGroups.filter((g: { pattern: string[] }) => g.pattern.every((word: string) => word.length <= 4))]
     } else if (level <= 4) {
-      availableGroups = [generatedGroup, ...wordGroups.filter(g => g.pattern.some(word => word.length > 4))]
+      availableGroups = [generatedGroup, ...wordGroups.filter((g: { pattern: string[] }) => g.pattern.some((word: string) => word.length > 4))]
     } else {
-      availableGroups = [generatedGroup, ...wordGroups.filter(g => g.hint.includes('emotions') || g.hint.includes('professions') || g.hint.includes('metals') || g.hint.includes('shapes'))]
+      availableGroups = [generatedGroup, ...wordGroups.filter((g: { hint: string }) => g.hint.includes('emotions') || g.hint.includes('professions') || g.hint.includes('metals') || g.hint.includes('shapes'))]
     }
 
     // Avoid repeating same pattern consecutively [18]
@@ -186,7 +186,7 @@ const OddOneOutLearning: React.FC = () => {
       selectedWord: null,
       feedback: '',
       showHint: false,
-      level: difficulty.level,
+      level,
       currentHint: group.hint,
       startTime: Date.now(),
       responseTime: 0,
@@ -200,7 +200,7 @@ const OddOneOutLearning: React.FC = () => {
   }
 
   const handleWordClick = (index: number) => {
-    if (gameState.selectedWord !== null || gameState.words.length === 0) return // [4] Edge case handling
+    if (gameState.selectedWord !== null || gameState.words.length === 0 || isTransitioning) return // [4] Edge case handling
 
     const responseTime = gameState.startTime ? Date.now() - gameState.startTime : 0
     const isCorrect = index === gameState.correctAnswer
@@ -251,7 +251,7 @@ const OddOneOutLearning: React.FC = () => {
         setGameState(prev => ({ ...prev, gameOver: true }))
       } else {
         setGameState(prev => ({ ...prev, round: prev.round + 1 }))
-        generateRound()
+        generateRound(gameState.difficulty)
       }
       setIsTransitioning(false)
     }, 2500)
@@ -381,7 +381,8 @@ const OddOneOutLearning: React.FC = () => {
   }, [gameState.gameOver, gameState.selectedWord, gameState.timeLeft, gameState.words.length])
 
   useEffect(() => {
-    if (gameState.gameOver || gameState.selectedWord !== null || gameState.timeLeft > 0 || !gameState.words.length) return
+    if (gameState.gameOver || gameState.timeLeft > 0 || !gameState.words.length || isTransitioning) return
+    setIsTransitioning(true)
     setGameState(prev => ({
       ...prev,
       selectedWord: prev.correctAnswer,
@@ -392,11 +393,12 @@ const OddOneOutLearning: React.FC = () => {
         setGameState(prev => ({ ...prev, gameOver: true }))
       } else {
         setGameState(prev => ({ ...prev, round: prev.round + 1 }))
-        generateRound()
+        generateRound(gameState.difficulty)
       }
+      setIsTransitioning(false)
     }, 1200)
     return () => window.clearTimeout(timeout)
-  }, [gameState.timeLeft, gameState.selectedWord, gameState.gameOver, gameState.words.length, gameState.round, maxRounds])
+  }, [gameState.timeLeft, gameState.gameOver, gameState.words.length, gameState.round, maxRounds, gameState.difficulty, isTransitioning])
 
   if (gameState.gameOver) {
     return (
@@ -520,7 +522,6 @@ const OddOneOutLearning: React.FC = () => {
             {gameState.words.map((word, index) => {
               const isSelected = gameState.selectedWord === index
               const isCorrect = index === gameState.correctAnswer
-              const isWrong = isSelected && !isCorrect
               
               return (
                 <motion.button

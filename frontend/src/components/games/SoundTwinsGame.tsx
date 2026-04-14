@@ -34,8 +34,7 @@ const SoundTwinsGame: React.FC = () => {
   const [roundStartTime, setRoundStartTime] = useState<number>(0)
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [saving, setSaving] = useState(false)
-  const gameConfig = gameConfigs['sound-twins']
+  const gameConfig = gameConfigs['sound-twins-learning']
 
   const soundPairSets = {
     beginner: [
@@ -144,12 +143,11 @@ const SoundTwinsGame: React.FC = () => {
         const avgResponseTime = responseTime
         
         if (user?.id) {
-          setSaving(true)
           try {
             await saveGameScore({
               userId: String(user.id),
               gameName: 'sound_twins',
-              difficulty: selectedLevel.difficulty,
+              difficulty: String(selectedLevel.difficulty),
               accuracy: accuracy / 100,
               avgResponseTime,
               errors,
@@ -157,8 +155,6 @@ const SoundTwinsGame: React.FC = () => {
             })
           } catch (err) {
             console.error("Failed to save score:", err)
-          } finally {
-            setSaving(false)
           }
         }
         
@@ -222,9 +218,15 @@ const SoundTwinsGame: React.FC = () => {
           <p className="text-gray-600 mb-6">
             Final Score: {gameState.score}/{selectedLevel.questionsCount} ({((gameState.score/selectedLevel.questionsCount)*100).toFixed(0)}%)
           </p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
             <button onClick={resetGame} className="btn btn-primary">
               Play Again
+            </button>
+            <button onClick={() => navigate('/games')} className="btn btn-default">
+              Explore More Games
+            </button>
+            <button onClick={() => navigate('/profile')} className="btn btn-outline">
+              View Profile
             </button>
             <button onClick={handleBack} className="btn btn-outline">
               Back to Games

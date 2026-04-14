@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Clock, Target, Volume2, Star, Zap, Brain, TrendingUp } from 'lucide-react'
+import { Clock, Volume2, Zap, Brain, TrendingUp } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '../../contexts/AuthContext'
 import { gameConfigs, GameLevel } from '../../lib/gameConfig'
@@ -10,7 +10,7 @@ import AnimatedCard from '../ui/AnimatedCard'
 import ProgressBar from '../ui/ProgressBar'
 import { playSuccessSound, playErrorSound, createParticles, shakeElement } from '../../lib/gameEffects'
 import { motion, AnimatePresence } from 'framer-motion'
-import { getAdaptiveDifficulty, getNextLevel } from '../../utils/adaptiveEngine'
+import { getAdaptiveDifficulty } from '../../lib/learningProgress'
 import { useAdaptiveEngine } from '../../hooks/UseAdaptiveEngine'
 import NeurologicalInsights from '../ui/NeurologicalInsights'
 import { analyzeGamePerformance, logMistakeWithTags } from '../../services/neurologicalService'
@@ -42,36 +42,12 @@ const WordRecognitionGame: React.FC<WordRecognitionGameProps> = ({ onGameComplet
   
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { difficulty, onLevelEnd, loading: adaptiveLoading } = useAdaptiveEngine(1)
+  const { difficulty, onLevelEnd } = useAdaptiveEngine(1)
   const wordDisplayRef = useRef<HTMLDivElement>(null)
   
   const gameConfig = gameConfigs['word-recognition']
 
   // Enhanced word sets with phonological patterns
-  const mirrorLetterMap: Record<string, string> = {
-    'b': 'd', 'd': 'b',
-    'p': 'q', 'q': 'p',
-    'm': 'w', 'w': 'm',
-    'n': 'u', 'u': 'n'
-  }
-
-  const createMirrorDistractor = (word: string): string => {
-    const letters = word.split('')
-    const mirrorEligible = letters
-      .map((l, i) => ({ letter: l, index: i }))
-      .filter(({ letter }) => mirrorLetterMap[letter.toLowerCase()])
-    
-    if (mirrorEligible.length === 0) return word
-    
-    const toReplace = mirrorEligible[Math.floor(Math.random() * mirrorEligible.length)]
-    const mirrored = mirrorLetterMap[toReplace.letter.toLowerCase()]
-    letters[toReplace.index] = toReplace.letter === toReplace.letter.toUpperCase() 
-      ? mirrored.toUpperCase() 
-      : mirrored
-    
-    return letters.join('')
-  }
-
   const wordSets = {
     beginner: {
       words: ['cat', 'dog', 'sun', 'car', 'run', 'big', 'red', 'hat', 'cup', 'pen', 'bat', 'man', 'box', 'toy', 'bee', 'bed', 'den', 'pod', 'nod'],
@@ -116,7 +92,7 @@ const WordRecognitionGame: React.FC<WordRecognitionGameProps> = ({ onGameComplet
     }
   }, [gameStarted, user])
 
-  const startGame = async (level: GameLevel) => {
+  const startGame = (level: GameLevel) => {
     setSelectedLevel(level)
     setGameStarted(true)
     setUsedWords([])
@@ -124,12 +100,8 @@ const WordRecognitionGame: React.FC<WordRecognitionGameProps> = ({ onGameComplet
     
     // Get adaptive difficulty if user is logged in
     if (user?.id) {
-      try {
-        const adaptiveDiff = await getAdaptiveDifficulty('word_recognition', user.id)
-        console.log('Adaptive difficulty:', adaptiveDiff)
-      } catch (error) {
-        console.error('Failed to get adaptive difficulty:', error)
-      }
+      const adaptiveDiff = getAdaptiveDifficulty(user.email || String(user.id), 'wordRecognition')
+      console.log('Adaptive difficulty:', adaptiveDiff)
     }
     
     generateQuestion(level)
@@ -293,7 +265,7 @@ const WordRecognitionGame: React.FC<WordRecognitionGameProps> = ({ onGameComplet
       if (user?.id) {
         // Enhanced neurological analysis
         const analysis = await analyzeGamePerformance({
-          userId: user.id,
+          userId: String(user.id),
           game: 'word_recognition',
           score: accuracy,
           timeTaken: avgResponseTime,
@@ -308,7 +280,7 @@ const WordRecognitionGame: React.FC<WordRecognitionGameProps> = ({ onGameComplet
           accuracy,
           avgResponseTime,
           errors,
-          userId: user.id
+          userId: String(user.id)
         })
         
         setAdaptiveRecommendation(result)
@@ -423,7 +395,7 @@ const WordRecognitionGame: React.FC<WordRecognitionGameProps> = ({ onGameComplet
                       <span className="font-semibold">Avg Response:</span> {(responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length / 1000).toFixed(1)}s
                     </div>
                     <div>
-                      <span className="font-semibold">Best Streak:</span> {Math.max(...responseTimes.map((_, i) => streak))}
+                      <span className="font-semibold">Best Streak:</span> {streak}
                     </div>
                     <div>
                       <span className="font-semibold">Errors:</span> {Object.keys(errors).length}

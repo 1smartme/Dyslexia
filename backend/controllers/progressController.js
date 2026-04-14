@@ -1,54 +1,56 @@
-const db = require("../config/db");
-const { pool } = require("../lib/mysql");
+const pool = require("../lib/postgres");
 
-exports.saveProgress = (req, res) => {
-  const { level, status } = req.body;
+exports.saveProgress = async (req, res) => {
+  const { level, status, game_name, score } = req.body;
+  const userId = req.user.id;
 
-  db.query(
-    "INSERT INTO progress (user_id, level, status) VALUES (?, ?, ?)",
-    [req.user.id, level, status],
-    (err, result) => {
-      if (err) return res.status(400).json({ error: err });
-      res.json({ message: "Progress saved" });
-    }
-  );
+  try {
+    const resolvedGameName = game_name || `Level ${level || 1}`;
+    const resolvedScore = Number(score ?? level ?? 0);
+    const resolvedDifficulty = status || "progress";
+
+    await pool.query(
+      `INSERT INTO game_results (user_id, game_type, game_name, difficulty, score, has_dyslexia, completed_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
+      [userId, "progress", resolvedGameName, resolvedDifficulty, resolvedScore, false]
+    );
+
+    return res.json({ message: "Progress saved" });
+  } catch (err) {
+    console.error("Error saving progress:", err);
+    return res.status(500).json({ error: "Failed to save progress" });
+  }
 };
 
 exports.getUserStats = async (req, res) => {
   const userId = req.user.id;
 
   try {
-    const [scoreRows] = await pool.execute(
-      `SELECT id, game_name, score, created_at
-       FROM scores
-       WHERE user_id = ?
-       ORDER BY created_at DESC`,
+    const scoreRowsRes = await pool.query(
+      `SELECT id, game_name, score, completed_at
+       FROM game_results
+       WHERE user_id = $1
+       ORDER BY completed_at DESC`,
       [userId]
     );
+    const scoreRows = scoreRowsRes.rows;
 
-    let totalTimePlayed = 0;
-    try {
-      const [timeRows] = await pool.execute(
-        `SELECT COALESCE(SUM(time_taken), 0) AS total_time_played
-         FROM scores
-         WHERE user_id = ?`,
-        [userId]
-      );
-      totalTimePlayed = Number(timeRows?.[0]?.total_time_played || 0);
-    } catch (_err) {
-      // Fallback when time_taken column is unavailable in current schema.
-      totalTimePlayed = 0;
-    }
+    const totalTimePlayed = 0;
 
+    const toPercent = (row) => {
+      const s = Number(row.score ?? 0);
+      if (!Number.isFinite(s)) return 0;
+      if (s >= 0 && s <= 10) return Math.min(100, Math.round(s * 10));
+      if (s <= 100) return Math.round(s);
+      return Math.min(100, Math.round(s));
+    };
+
+    const percents = scoreRows.map(toPercent);
     const totalGamesPlayed = scoreRows.length;
     const averageScore = totalGamesPlayed
-      ? Math.round(
-          scoreRows.reduce((sum, row) => sum + Number(row.score || 0), 0) / totalGamesPlayed
-        )
+      ? Math.round(percents.reduce((sum, p) => sum + p, 0) / totalGamesPlayed)
       : 0;
-    const bestScore = totalGamesPlayed
-      ? Math.max(...scoreRows.map((row) => Number(row.score || 0)))
-      : 0;
+    const bestScore = totalGamesPlayed ? Math.max(...percents) : 0;
 
     return res.json({
       totalGamesPlayed,

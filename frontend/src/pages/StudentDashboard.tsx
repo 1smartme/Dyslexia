@@ -1,17 +1,15 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import {
   Trophy,
   Star,
   Clock,
   Target,
-  BookOpen,
   Brain,
-  AlertTriangle,
-  CheckCircle,
   RefreshCw,
 } from "lucide-react";
 import { getRecentScores } from '../services/scoreService'
+import { scoreRowToPercent } from '../lib/profileAggregates'
 
 import { getRecommendations } from "../services/recommendationService";
 import {
@@ -35,7 +33,7 @@ export default function StudentDashboard() {
   const user = authUser;
 
   const [scores, setScores] = useState<any[]>([]);
-  const [recs, setRecs] = useState<any[]>([]);
+  const [, setRecs] = useState<any[]>([]);
   const [assessment, setAssessment] = useState<NeurologicalAssessment | null>(
     null
   );
@@ -68,12 +66,12 @@ export default function StudentDashboard() {
 
   // Stats calculations
   const gamesPlayed = scores.length;
+  const percents = scores.map((s) => scoreRowToPercent(s));
   const avgAccuracy =
-    scores.length > 0
-      ? scores.reduce((sum, s) => sum + (s.score || 0), 0) / scores.length
+    percents.length > 0
+      ? percents.reduce((sum, p) => sum + p, 0) / percents.length
       : 0;
-  const bestScore =
-    scores.length > 0 ? Math.max(...scores.map((s) => s.score || 0)) : 0;
+  const bestScore = percents.length > 0 ? Math.max(...percents) : 0;
   const totalTimePlayed = scores.reduce(
     (sum, s) => sum + (s.time_taken || 0),
     0

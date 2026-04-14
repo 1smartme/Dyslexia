@@ -1,0 +1,87 @@
+{
+  "session_id": "smoke_b3c9a7b50f87",
+  "session_file": "session_20260411_100625.json",
+  "name": "Smoke Test",
+  "age": 10,
+  "grade": 5,
+  "score": 2,
+  "total": 4,
+  "accuracy": 50.0,
+  "risk": "Low",
+  "timestamp": "2026-04-11 04:36:25",
+  "server_timestamp": "2026-04-11T10:06:25.420065",
+  "ml_detection": {
+    "risk": "Low",
+    "risk_score": 3.291456558546058e-05,
+    "confidence": 0.9999670854344146,
+    "method": "ml",
+    "prediction": 0,
+    "feature_importance": {
+      "num__age": 0.0,
+      "num__grade": 0.0,
+      "num__family_history": 0.0,
+      "num__calibration_quality": 0.0,
+      "num__fixation_mean_dur": 0.0,
+      "num__fixation_count": 0.0,
+      "num__saccade_mean_amp": 0.0,
+      "num__regressions_count": 0.6202595005308333,
+      "num__scanpath_entropy": 0.0,
+      "num__total_reading_time": 0.37974049946916655,
+      "num__errors_count": 0.0,
+      "cat__language_en": 0.0,
+      "cat__language_en-US": 0.0,
+      "cat__device_type_Desktop": 0.0
+    },
+    "reason": "ML/Statistical analysis",
+    "assessment_summary": {
+      "score": 2,
+      "total": 4,
+      "accuracy_percent": 50.0,
+      "errors_count": 2,
+      "fixation_mean_dur_ms": 180.0,
+      "regressions_count": 1,
+      "reading_speed_wpm": 130.0,
+      "scanpath_entropy": 2.1
+    }
+  },
+  "fixation_stats": {
+    "mean_duration": 180.0,
+    "count": 10
+  },
+  "saccade_stats": {
+    "mean_amplitude": 0.03,
+    "mean_velocity": 0.9
+  },
+  "regressions": {
+    "count": 1
+  },
+  "scanpath_entropy": 2.1,
+  "reading_speed_wpm": 130.0,
+  "total_reading_time_ms": 8500,
+  "errors_count": 2,
+  "device_type": "Desktop",
+  "screen_resolution": "1920x1080",
+  "language": "en",
+  "server_derived_features": {
+    "session_id": "smoke_b3c9a7b50f87",
+    "n_gaze_samples": 50,
+    "n_fixations": 3,
+    "fixation_mean_dur": 0.0,
+    "fixation_median_dur": 0.0,
+    "fixation_std_dur": 0.0,
+    "n_saccades": 3,
+    "saccade_mean_amp": 13.508337643709185,
+    "saccade_std_amp": 15.565728815216698,
+    "saccade_mean_vel": 21616.20023647002,
+    "regressions_count": 1,
+    "scanpath_entropy": 0.0,
+    "reading_speed_wpm": 0.0,
+    "total_reading_time_ms": 8500,
+    "accuracy": null,
+    "errors_count": null,
+    "stt_confidence": null,
+    "screen_w": null,
+    "screen_h": null,
+    "device_agent": null
+  }
+}

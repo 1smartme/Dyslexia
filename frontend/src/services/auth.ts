@@ -4,7 +4,7 @@ export async function signUp(
   email: string,
   password: string,
   fullName: string,
-  role: string
+  _role: string
 ) {
   try {
     const response = await fetch(`${API_URL}/register`, {

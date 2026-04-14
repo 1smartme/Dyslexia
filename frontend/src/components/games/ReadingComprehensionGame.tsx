@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Clock, BookOpen } from 'lucide-react'
+import { Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '../../contexts/AuthContext'
 import { gameConfigs, GameLevel } from '../../lib/gameConfig'
@@ -30,7 +30,7 @@ const ReadingComprehensionGame: React.FC<ReadingComprehensionGameProps> = ({ onG
   const { user } = useAuth()
   const navigate = useNavigate()
   
-  const gameConfig = gameConfigs['reading-comprehension']
+  const gameConfig = gameConfigs['reading-comprehension-learning']
 
   const questionSets = {
     beginner: [
@@ -234,9 +234,15 @@ const ReadingComprehensionGame: React.FC<ReadingComprehensionGameProps> = ({ onG
               </div>
             </div>
             
-            <div className="flex gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
               <button onClick={restartGame} className="btn btn-primary">
                 Play Again
+              </button>
+              <button onClick={() => navigate('/games')} className="btn btn-default">
+                Explore More Games
+              </button>
+              <button onClick={() => navigate('/profile')} className="btn btn-outline">
+                View Profile
               </button>
               <button 
                 onClick={handleBack}

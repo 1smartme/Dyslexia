@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { Camera } from 'lucide-react'
-import { sendDyslexiaSessionData } from '../../services/dyslexiaSessionService'
+import { saveDyslexiaSessionData, sendDyslexiaSessionData } from '../../services/dyslexiaSessionService'
 import { useWebGazerTracking } from '../../hooks/useWebGazerTracking'
 
 export interface SessionMetrics {
@@ -209,7 +209,7 @@ const CameraTracker: React.FC<CameraTrackerProps> = ({
     try {
       if (gazeStream.length > 0) {
         console.log('Sending Data')
-        const response = await sendDyslexiaSessionData({
+        const payload = {
           session_id: resolvedSessionId,
           user_id: userId,
           game_type: gameName,
@@ -227,8 +227,16 @@ const CameraTracker: React.FC<CameraTrackerProps> = ({
           },
           reading_speed_wpm: metrics.readingSpeedWPM,
           timestamp: sessionTimestamp,
-        })
-        onSessionSaved?.(response)
+        }
+        const dbResponse = await saveDyslexiaSessionData(payload)
+        let mlResponse: unknown = null
+        try {
+          mlResponse = await sendDyslexiaSessionData(payload)
+        } catch (mlErr) {
+          // Session is already persisted in PostgreSQL, so ML forwarding should not block completion.
+          console.warn('ML analysis failed, but session was saved to database:', mlErr)
+        }
+        onSessionSaved?.({ db: dbResponse, ml: mlResponse })
         console.log('Session Saved')
       } else if (isRecordingRef.current) {
         console.warn('No gaze points captured; skipping /api/dyslexia/analyze submit.')

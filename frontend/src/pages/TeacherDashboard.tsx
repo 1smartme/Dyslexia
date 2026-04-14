@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Users, Activity, Clock, TrendingUp } from "lucide-react";
 import { getRecentScores } from '../services/scoreService'
@@ -6,7 +6,7 @@ import { getRecentScores } from '../services/scoreService'
 import { useAuth } from "../contexts/AuthContext";
 
 export default function TeacherDashboard() {
-  const { user, isTeacher, isAdmin } = useAuth();
+  const { isTeacher, isAdmin } = useAuth();
   const [allScores, setAllScores] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 

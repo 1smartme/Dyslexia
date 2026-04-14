@@ -252,9 +252,15 @@ const BuildWordGame: React.FC = () => {
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-4">Word Building Complete!</h2>
           <p className="text-gray-600 mb-6">Final Score: {gameState.score.toFixed(1)} points</p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
             <button onClick={resetGame} className="btn btn-primary">
               Play Again
+            </button>
+            <button onClick={() => navigate('/games')} className="btn btn-default">
+              Explore More Games
+            </button>
+            <button onClick={() => navigate('/profile')} className="btn btn-outline">
+              View Profile
             </button>
             <button onClick={handleBack} className="btn btn-outline">
               Back to Games

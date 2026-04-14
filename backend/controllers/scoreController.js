@@ -1,5 +1,5 @@
 // backend/controllers/scoreController.js
-const { pool } = require("../lib/mysql");
+const pool = require("../lib/postgres");
 
 // Save a game score
 exports.saveScore = async (req, res) => {
@@ -11,12 +11,14 @@ exports.saveScore = async (req, res) => {
       return res.status(400).json({ error: "game_name and score are required" });
     }
 
-    const [result] = await pool.execute(
-      `INSERT INTO scores (user_id, game_name, score, created_at) VALUES (?, ?, ?, NOW())`,
-      [user_id, game_name, score]
+    const result = await pool.query(
+      `INSERT INTO game_results (user_id, game_type, game_name, difficulty, score, has_dyslexia, completed_at)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())
+       RETURNING *`,
+      [user_id, game_name, game_name, "medium", Number(score), false]
     );
 
-    res.json({ message: "Score saved successfully", data: result });
+    res.json({ message: "Score saved successfully", data: result.rows[0] });
   } catch (err) {
     console.error("Error saving score:", err);
     res.status(500).json({ error: "Failed to save score" });
@@ -28,12 +30,15 @@ exports.getScores = async (req, res) => {
   try {
     const user_id = req.user.id;
 
-    const [rows] = await pool.execute(
-      `SELECT * FROM scores WHERE user_id = ? ORDER BY created_at DESC`,
+    const rows = await pool.query(
+      `SELECT id, user_id, game_name, score, completed_at
+       FROM game_results
+       WHERE user_id = $1
+       ORDER BY completed_at DESC`,
       [user_id]
     );
 
-    res.json(rows);
+    res.json(rows.rows);
   } catch (err) {
     console.error("Error fetching scores:", err);
     res.status(500).json({ error: "Failed to fetch scores" });
@@ -46,14 +51,15 @@ exports.getScoresByDateRange = async (req, res) => {
     const { startDate, endDate } = req.query;
     const user_id = req.user.id;
 
-    const [rows] = await pool.execute(
-      `SELECT * FROM scores 
-       WHERE user_id = ? AND created_at BETWEEN ? AND ?
-       ORDER BY created_at DESC`,
+    const rows = await pool.query(
+      `SELECT id, user_id, game_name, score, completed_at
+       FROM game_results
+       WHERE user_id = $1 AND completed_at BETWEEN $2::timestamptz AND $3::timestamptz
+       ORDER BY completed_at DESC`,
       [user_id, startDate, endDate]
     );
 
-    res.json(rows);
+    res.json(rows.rows);
   } catch (err) {
     console.error("Error fetching scores by date range:", err);
     res.status(500).json({ error: "Failed to fetch scores by date range" });

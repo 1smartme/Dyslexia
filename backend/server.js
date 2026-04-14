@@ -1,20 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const axios = require("axios");
-const { Pool } = require("pg");
+const pgPool = require("./lib/postgres");
 const validateDyslexiaPayload = require("./middleware/validateDyslexiaPayload");
+const { estimateRiskFromSession } = require("./lib/dyslexiaRiskEstimate");
 require("dotenv").config();
 
 const app = express();
 const ML_API_URL = process.env.ML_API_URL || "http://localhost:8000";
 const ML_TIMEOUT_MS = Number(process.env.ML_TIMEOUT_MS || 10000);
-const pgPool = new Pool({
-  host: process.env.POSTGRES_HOST || "localhost",
-  port: Number(process.env.POSTGRES_PORT || 5432),
-  user: process.env.POSTGRES_USER || "postgres",
-  password: process.env.POSTGRES_PASSWORD || "yourpassword",
-  database: process.env.POSTGRES_DB || "dyslexia_db",
-});
 
 const buildErrorResponse = (error, details, code) => ({
   error,
@@ -28,6 +22,107 @@ app.use(express.json());
 app.use("/api/auth", require("./routes/authRoutes"));
 app.use("/api/scores", require("./routes/scoreRoutes"));
 app.use("/api/progress", require("./routes/progressRoutes"));
+app.use("/api/parent", require("./routes/parentRoutes"));
+app.use("/api/admin", require("./routes/adminRoutes"));
+
+async function ensureDyslexiaSessionColumns() {
+  try {
+    await pgPool.query(`
+      ALTER TABLE dyslexia_sessions
+        ADD COLUMN IF NOT EXISTS risk_score DOUBLE PRECISION;
+      ALTER TABLE dyslexia_sessions
+        ADD COLUMN IF NOT EXISTS ml_prediction INTEGER;
+    `);
+  } catch (err) {
+    console.warn("[dyslexia_sessions] column ensure skipped:", err.message);
+  }
+}
+
+app.post("/api/dyslexia/sessions", validateDyslexiaPayload, async (req, res) => {
+  const payload = req.body;
+  const requestId = `dys-db-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
+
+  try {
+    const inferred = estimateRiskFromSession(payload);
+    const risk =
+      payload.risk != null && String(payload.risk).trim() !== ""
+        ? String(payload.risk).trim()
+        : inferred.risk;
+    const risk_score =
+      typeof payload.risk_score === "number" && Number.isFinite(payload.risk_score)
+        ? payload.risk_score
+        : inferred.risk_score;
+    const ml_prediction =
+      typeof payload.ml_prediction === "number" && Number.isInteger(payload.ml_prediction)
+        ? payload.ml_prediction
+        : inferred.ml_prediction;
+
+    const query = `
+      INSERT INTO dyslexia_sessions (
+        session_id,
+        user_id,
+        game_type,
+        difficulty,
+        score,
+        total,
+        accuracy,
+        fixation_mean_dur,
+        regressions_count,
+        reading_speed_wpm,
+        risk,
+        risk_score,
+        ml_prediction,
+        "timestamp"
+      )
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, COALESCE($14::timestamptz, NOW()))
+      ON CONFLICT (session_id)
+      DO UPDATE SET
+        user_id = EXCLUDED.user_id,
+        game_type = EXCLUDED.game_type,
+        difficulty = EXCLUDED.difficulty,
+        score = EXCLUDED.score,
+        total = EXCLUDED.total,
+        accuracy = EXCLUDED.accuracy,
+        fixation_mean_dur = EXCLUDED.fixation_mean_dur,
+        regressions_count = EXCLUDED.regressions_count,
+        reading_speed_wpm = EXCLUDED.reading_speed_wpm,
+        risk = EXCLUDED.risk,
+        risk_score = EXCLUDED.risk_score,
+        ml_prediction = EXCLUDED.ml_prediction,
+        "timestamp" = EXCLUDED."timestamp"
+      RETURNING *
+    `;
+
+    const values = [
+      payload.session_id,
+      payload.user_id,
+      payload.game_type,
+      payload.difficulty,
+      payload.score,
+      payload.total,
+      payload.accuracy,
+      payload.fixation_stats.mean_duration,
+      payload.regressions.count,
+      payload.reading_speed_wpm,
+      risk,
+      risk_score,
+      ml_prediction,
+      payload.timestamp || null,
+    ];
+
+    const result = await pgPool.query(query, values);
+    return res.status(200).json({
+      ok: true,
+      source: "postgres",
+      session: result.rows[0] || null,
+    });
+  } catch (error) {
+    console.error(`[${requestId}] /api/dyslexia/sessions db error:`, error.message);
+    return res
+      .status(500)
+      .json(buildErrorResponse("Failed to save dyslexia session", error.message, "DB_ERROR"));
+  }
+});
 
 app.post("/api/dyslexia/analyze", validateDyslexiaPayload, async (req, res) => {
   const requestId = `dys-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`;
@@ -140,6 +235,8 @@ app.get("/api/dyslexia/sessions/:userId", async (req, res) => {
   }
 });
 
-app.listen(5000, () => {
-  console.log("Server running on http://localhost:5000");
+ensureDyslexiaSessionColumns().finally(() => {
+  app.listen(5000, () => {
+    console.log("Server running on http://localhost:5000");
+  });
 });

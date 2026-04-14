@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
-import { ArrowLeft, User, Mail, Calendar, School, Users, Edit, Save, X } from 'lucide-react'
+import { ArrowLeft, Edit, Save, X } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 import { getProfile, updateProfile, type UserProfile } from '../services/profileService'
 

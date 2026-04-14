@@ -30,22 +30,20 @@ const WordRecognitionGameRefactored: React.FC<WordRecognitionGameProps> = ({ onG
   const [timeLeft, setTimeLeft] = useState(10)
   const [gameComplete, setGameComplete] = useState(false)
   const [usedWords, setUsedWords] = useState<string[]>([])
-  const [gameStartTime, setGameStartTime] = useState<number>(0)
   const [streak, setStreak] = useState(0)
   const [showFeedback, setShowFeedback] = useState<{ type: 'success' | 'error'; message: string; emoji: string } | null>(null)
   const [roundStartTime, setRoundStartTime] = useState<number>(0)
   const [errors, setErrors] = useState<Record<string, any>>({})
   const [neurologicalAnalysis, setNeurologicalAnalysis] = useState<any>(null)
-  const [adaptiveRecommendation, setAdaptiveRecommendation] = useState<any>(null)
   const [responseTimes, setResponseTimes] = useState<number[]>([])
   const [attemptId, setAttemptId] = useState<string>('')
 
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { difficulty, onLevelEnd } = useAdaptiveEngine(1)
+  const { difficulty } = useAdaptiveEngine(1)
   const wordDisplayRef = useRef<HTMLDivElement>(null)
 
-  const gameConfig = gameConfigs['word-recognition']
+  const gameConfig = gameConfigs['word-recognition-learning']
 
   const wordSets = {
     beginner: {
@@ -95,7 +93,6 @@ const WordRecognitionGameRefactored: React.FC<WordRecognitionGameProps> = ({ onG
     setSelectedLevel(level)
     setGameStarted(true)
     setUsedWords([])
-    setGameStartTime(Date.now())
     generateQuestion(level)
   }
 
@@ -119,7 +116,12 @@ const WordRecognitionGameRefactored: React.FC<WordRecognitionGameProps> = ({ onG
       .filter(w => w !== correctWord && !distractors.includes(w))
       .sort(() => Math.random() - 0.5)[0]
 
-    const allOptions = [correctWord, ...distractors, randomWord].sort(() => Math.random() - 0.5)
+    const fallbackWord =
+      randomWord ||
+      wordSet.distractors.find(d => d !== correctWord && !distractors.includes(d)) ||
+      correctWord
+
+    const allOptions = [correctWord, ...distractors, fallbackWord].sort(() => Math.random() - 0.5)
 
     setCurrentWord(correctWord)
     setOptions(allOptions)
@@ -238,15 +240,13 @@ const WordRecognitionGameRefactored: React.FC<WordRecognitionGameProps> = ({ onG
     if (!selectedLevel) return
 
     setGameComplete(true)
-    const gameEndTime = Date.now()
-    const gameDurationSeconds = Math.floor((gameEndTime - gameStartTime) / 1000)
     const accuracy = (score / selectedLevel.questionsCount) * 100
     const avgResponseTime = responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length
 
     try {
       if (user?.id) {
         const analysis = await analyzeGamePerformance({
-          userId: user.id,
+          userId: String(user.id),
           game: 'word_recognition',
           score: accuracy,
           timeTaken: avgResponseTime,
@@ -255,9 +255,9 @@ const WordRecognitionGameRefactored: React.FC<WordRecognitionGameProps> = ({ onG
         setNeurologicalAnalysis(analysis)
 
         await saveGameScore({
-          userId: user.id,
+          userId: String(user.id),
           gameName: 'word_recognition',
-          difficulty: selectedLevel.difficulty,
+          difficulty: String(selectedLevel.difficulty),
           accuracy: accuracy / 100,
           avgResponseTime,
           errors
@@ -288,8 +288,20 @@ const WordRecognitionGameRefactored: React.FC<WordRecognitionGameProps> = ({ onG
     navigate('/dashboard')
   }
 
+  const accuracy = selectedLevel ? (score / selectedLevel.questionsCount) * 100 : 0
+  const avgResponseTime =
+    responseTimes.length > 0 ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length : 0
+
   if (!selectedLevel || !gameStarted) {
-    return <LevelSelector gameConfig={gameConfig} onSelectLevel={startGame} />
+    return (
+      <LevelSelector 
+        gameTitle={gameConfig.title}
+        gameDescription={gameConfig.description}
+        levels={gameConfig.levels}
+        onLevelSelect={startGame}
+        onBack={handleBack}
+      />
+    )
   }
 
   if (gameComplete) {
@@ -375,9 +387,15 @@ const WordRecognitionGameRefactored: React.FC<WordRecognitionGameProps> = ({ onG
               </div>
             )}
 
-            <div className="flex gap-4 justify-center flex-wrap">
+            <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
               <InteractiveButton onClick={handleReset} variant="success">
                 Play Again
+              </InteractiveButton>
+              <InteractiveButton onClick={() => navigate('/games')} variant="primary">
+                Explore More Games
+              </InteractiveButton>
+              <InteractiveButton onClick={() => navigate('/profile')} variant="outline">
+                View Profile
               </InteractiveButton>
               <InteractiveButton onClick={handleBack} variant="outline">
                 Back to Dashboard
@@ -388,9 +406,6 @@ const WordRecognitionGameRefactored: React.FC<WordRecognitionGameProps> = ({ onG
       </GameShell>
     )
   }
-
-  const accuracy = (score / selectedLevel.questionsCount) * 100
-  const avgResponseTime = responseTimes.length > 0 ? responseTimes.reduce((a, b) => a + b, 0) / responseTimes.length : 0
 
   return (
     <GameShell

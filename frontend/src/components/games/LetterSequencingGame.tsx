@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ArrowLeft, Clock, Shuffle } from 'lucide-react'
+import { ArrowLeft, Clock } from 'lucide-react'
 import { toast } from 'sonner'
 import { useAuth } from '../../contexts/AuthContext'
 
@@ -21,8 +21,6 @@ const LetterSequencingGame: React.FC<LetterSequencingGameProps> = ({ onGameCompl
   const [usedWords, setUsedWords] = useState<string[]>([])
   const { user } = useAuth()
   const navigate = useNavigate()
-
-  const mirrorEligible = ['b', 'd', 'p', 'q', 'm', 'w']
 
   const wordSets = {
     easy: ['cat', 'dog', 'sun', 'car', 'run', 'big', 'red', 'hat', 'cup', 'pen'],

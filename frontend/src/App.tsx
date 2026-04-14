@@ -7,12 +7,15 @@ import LandingPage from './pages/LandingPage'
 import AuthPage from './pages/AuthPage'
 import Dashboard from './pages/Dashboard'
 import GamePage from './pages/GamePage'
-import AdminDashboard from './pages/AdminDashboard'
 import ProfilePage from './pages/ProfilePage'
-import ParentDashboard from './pages/ParentDashboard'
 import TeacherDashboard from './pages/TeacherDashboard'
 import UserProfile from './pages/UserProfile'
 import ThemeToggle from './components/ui/ThemeToggle'
+import ParentLogin from './pages/ParentLogin.jsx'
+import ParentSignup from './pages/ParentSignup.jsx'
+import ParentDashboard from './pages/ParentDashboard.jsx'
+import AdminLogin from './pages/AdminLogin.jsx'
+import AdminDashboard from './pages/AdminDashboard.jsx'
 import './App.css'
 
 function App() {
@@ -25,6 +28,9 @@ function App() {
           <Routes>
             <Route path="/" element={<LandingPage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/parent/login" element={<ParentLogin />} />
+            <Route path="/parent/signup" element={<ParentSignup />} />
+            <Route path="/admin/login" element={<AdminLogin />} />
             <Route 
               path="/dashboard" 
               element={
@@ -58,6 +64,14 @@ function App() {
               } 
             />
             <Route 
+              path="/admin/dashboard" 
+              element={
+                <ProtectedRoute requireAdmin>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="/profile" 
               element={
                 <ProtectedRoute>
@@ -67,6 +81,14 @@ function App() {
             />
             <Route 
               path="/parent" 
+              element={
+                <ProtectedRoute requireParent>
+                  <ParentDashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/parent/dashboard" 
               element={
                 <ProtectedRoute requireParent>
                   <ParentDashboard />

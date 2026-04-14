@@ -5,7 +5,7 @@ import { useAuth } from '../../contexts/AuthContext'
 import { updateGameProgress, getAdaptiveDifficulty, getEncouragingMessage, speakText } from '../../lib/learningProgress'
 import { saveGameScore } from '../../services/scoreService'
 import { CameraTracker } from '../tracking/CameraTracker'
-import { DIFFICULTY_SETTINGS, getGameContent, pickConfusingWord } from '../../data/difficultySystem'
+import { DIFFICULTY_SETTINGS, getGameContent, pickConfusingWord, type GameContentItem } from '../../data/difficultySystem'
 
 interface GameState {
   images: { name: string; emoji: string; id: number }[]
@@ -38,7 +38,7 @@ const SpeedWordsLearning: React.FC = () => {
     targetId: -1,
     difficulty: 'easy'
   })
-  const [savingScore, setSavingScore] = useState(false)
+  const [, setSavingScore] = useState(false)
   const [scoreSaved, setScoreSaved] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
 
@@ -59,11 +59,13 @@ const SpeedWordsLearning: React.FC = () => {
     const difficultyWords = getGameContent(gameState.difficulty)
     const pool = [...difficultyWords]
     if (gameState.difficulty === 'hard') {
-      const confusing = difficultyWords
-        .map(item => pickConfusingWord(item.word))
-        .filter((word): word is string => !!word)
-        .slice(0, 2)
-        .map(word => ({ word, image: '❓' }))
+      const confusing: GameContentItem[] = []
+      for (const item of difficultyWords) {
+        const w = pickConfusingWord(item.word)
+        if (w == null) continue
+        confusing.push({ word: w, image: '❓' })
+        if (confusing.length >= 2) break
+      }
       pool.push(...confusing)
     }
     const shuffled = [...pool].sort(() => Math.random() - 0.5)
@@ -353,7 +355,6 @@ const SpeedWordsLearning: React.FC = () => {
           <div className="grid grid-cols-3 gap-6">
             {gameState.images.map((item) => {
               const isSelected = gameState.selectedItems.includes(item.id)
-              const isCorrectSelection = isSelected && item.id === gameState.targetId
               const isWrongSelection = isSelected && gameState.soundMode && item.id !== gameState.targetId
               const selectionOrder = gameState.selectedItems.indexOf(item.id) + 1
               

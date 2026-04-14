@@ -32,11 +32,9 @@ const LetterMirrorGame: React.FC = () => {
     gameOver: false,
     feedback: ''
   })
-  const [errors, setErrors] = useState<Record<string, any>>({})
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [saving, setSaving] = useState(false)
-  const gameConfig = gameConfigs['letter-mirror']
+  const gameConfig = gameConfigs['letter-mirror-learning']
 
   const mirrorLetterSets = {
     beginner: ['b', 'd', 'p', 'q'],
@@ -50,8 +48,8 @@ const LetterMirrorGame: React.FC = () => {
     const letters = mirrorLetterSets[selectedLevel.id as keyof typeof mirrorLetterSets]
     const target = letters[Math.floor(Math.random() * letters.length)]
     const gridSize = Math.min(8 + gameState.round, 16)
-    const gameLetters = []
-    const correctIndices = []
+    const gameLetters: string[] = []
+    const correctIndices: number[] = []
     
     const targetCount = Math.floor(Math.random() * 3) + 2
     
@@ -126,20 +124,17 @@ const LetterMirrorGame: React.FC = () => {
       const avgResponseTime = (selectedLevel.timeLimit || 8) * 1000
       
       if (user?.id) {
-        setSaving(true)
         try {
           await saveGameScore({
-            userId: user.id,
+            userId: String(user.id),
             gameName: 'letter_mirror',
-            difficulty: selectedLevel.difficulty,
+            difficulty: String(selectedLevel.difficulty),
             accuracy: accuracy / 100,
             avgResponseTime,
-            errors
+            errors: {}
           })
         } catch (err) {
           console.error("Failed to save score:", err)
-        } finally {
-          setSaving(false)
         }
       }
       
@@ -218,9 +213,15 @@ const LetterMirrorGame: React.FC = () => {
           <CheckCircle className="w-16 h-16 text-green-500 mx-auto mb-4" />
           <h2 className="text-2xl font-bold mb-4">Game Complete!</h2>
           <p className="text-gray-600 mb-6">Final Score: {gameState.score.toFixed(1)} points</p>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
             <button onClick={resetGame} className="btn btn-primary">
               Play Again
+            </button>
+            <button onClick={() => navigate('/games')} className="btn btn-default">
+              Explore More Games
+            </button>
+            <button onClick={() => navigate('/profile')} className="btn btn-outline">
+              View Profile
             </button>
             <button onClick={handleBack} className="btn btn-outline">
               Back to Games
@@ -269,8 +270,6 @@ const LetterMirrorGame: React.FC = () => {
             {gameState.letters.map((letter, index) => {
               const isSelected = gameState.selectedIndices.includes(index)
               const isCorrect = gameState.correctIndices.includes(index)
-              const isWrong = isSelected && !isCorrect
-              
               return (
                 <motion.button
                   key={index}

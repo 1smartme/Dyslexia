@@ -6,7 +6,7 @@ interface UseSessionTrackerProps {
   gameScore?: number;
 }
 
-export const useSessionTracker = ({ userId, gameScore = 0 }: UseSessionTrackerProps) => {
+export const useSessionTracker = ({ userId: _userId, gameScore = 0 }: UseSessionTrackerProps) => {
   const [metrics, setMetrics] = useState<SessionMetrics>({
     timestamp: '',
     readingSpeedWPM: 0,

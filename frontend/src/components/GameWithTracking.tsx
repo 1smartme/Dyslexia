@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { CameraTracker } from './tracking/CameraTracker';
 import { useSessionTracker } from '../hooks/useSessionTracker';
 
@@ -7,14 +7,10 @@ const GameWithTracking = () => {
   const userId = 'user123'; // Replace with actual user ID from auth context
   
   const {
-    metrics,
     startTracking,
     recordWordRead,
-    recordFixation,
-    recordRegression,
     updateAccuracy,
     calculateMetrics,
-    resetMetrics
   } = useSessionTracker({ userId, gameScore: score });
 
   const handleGameStart = () => {

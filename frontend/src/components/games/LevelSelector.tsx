@@ -106,6 +106,10 @@ const LevelSelector: React.FC<LevelSelectorProps> = ({
 
                 <button
                   type="button"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onLevelSelect(level)
+                  }}
                   className={`btn w-full bg-gradient-to-r ${level.color} text-white hover:shadow-lg transform transition-all duration-300 group-hover:scale-105 border-0 mt-4`}
                 >
                   Start Level

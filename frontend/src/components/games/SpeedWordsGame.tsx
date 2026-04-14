@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { CheckCircle, Clock, Target, Zap } from 'lucide-react'
+import { Target, Zap } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { gameConfigs, GameLevel } from '../../lib/gameConfig'
 import LevelSelector from './LevelSelector'
@@ -30,15 +30,7 @@ const SpeedWordsGame: React.FC = () => {
   })
   const navigate = useNavigate()
   const { user } = useAuth()
-  const [saving, setSaving] = useState(false)
-  const gameConfig = gameConfigs['speed-words']
-
-  const mirrorLetterMap = {
-    'b': 'd', 'd': 'b',
-    'p': 'q', 'q': 'p',
-    'm': 'w', 'w': 'm',
-    'n': 'u', 'u': 'n'
-  }
+  const gameConfig = gameConfigs['speed-words-learning']
 
   const imageItemSets = {
     beginner: [
@@ -140,20 +132,17 @@ const SpeedWordsGame: React.FC = () => {
       const avgResponseTime = totalTime / selectedLevel.questionsCount
       
       if (user?.id) {
-        setSaving(true)
         try {
           await saveGameScore({
-            userId: user.id,
+            userId: String(user.id),
             gameName: 'speed_words',
-            difficulty: selectedLevel.difficulty,
+            difficulty: String(selectedLevel.difficulty),
             accuracy: accuracy / 100,
             avgResponseTime,
             errors: {}
           })
         } catch (err) {
           console.error("Failed to save score:", err)
-        } finally {
-          setSaving(false)
         }
       }
       
@@ -224,9 +213,15 @@ const SpeedWordsGame: React.FC = () => {
             <p className="text-gray-600">Total Time: {totalTime}s</p>
             <p className="text-gray-600">Average per Round: {(parseFloat(totalTime) / selectedLevel.questionsCount).toFixed(1)}s</p>
           </div>
-          <div className="flex gap-4 justify-center">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center flex-wrap">
             <button onClick={resetGame} className="btn btn-primary">
               Play Again
+            </button>
+            <button onClick={() => navigate('/games')} className="btn btn-default">
+              Explore More Games
+            </button>
+            <button onClick={() => navigate('/profile')} className="btn btn-outline">
+              View Profile
             </button>
             <button onClick={handleBack} className="btn btn-outline">
               Back to Games

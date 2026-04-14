@@ -54,9 +54,10 @@ const ReadingComprehensionLearning: React.FC = () => {
     sessionStartTime: Date.now(),
     gameErrors: []
   })
-  const [savingScore, setSavingScore] = useState(false)
+  const [, setSavingScore] = useState(false)
   const [scoreSaved, setScoreSaved] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const [latestSessionRisk, setLatestSessionRisk] = useState<{ risk: string; risk_score?: number } | null>(null)
   const guidedReadActiveRef = useRef(false)
   const guidedReadTimerRef = useRef<number | null>(null)
@@ -161,7 +162,7 @@ const ReadingComprehensionLearning: React.FC = () => {
   }
 
   const submitAnswers = () => {
-    if (!gameState.currentPassage || !user) return
+    if (!gameState.currentPassage || !user || isTransitioning) return
     
     const correctAnswers = gameState.selectedAnswers.filter((answer, index) => 
       answer === gameState.currentPassage!.questions[index].correct
@@ -207,6 +208,7 @@ const ReadingComprehensionLearning: React.FC = () => {
       feedback: getEncouragingMessage(recentAccuracy, isImprovement)
     }))
     
+    setIsTransitioning(true)
     setTimeout(() => {
       if (gameState.round >= maxRounds) {
         setGameState(prev => ({ ...prev, gameOver: true }))
@@ -214,6 +216,7 @@ const ReadingComprehensionLearning: React.FC = () => {
         setGameState(prev => ({ ...prev, round: prev.round + 1 }))
         generateRound()
       }
+      setIsTransitioning(false)
     }, 3000)
   }
 
@@ -237,6 +240,7 @@ const ReadingComprehensionLearning: React.FC = () => {
       gameErrors: []
     })
     setHasStarted(false)
+    setIsTransitioning(false)
   }
 
   useEffect(() => {
@@ -261,6 +265,7 @@ const ReadingComprehensionLearning: React.FC = () => {
     }))
     setScoreSaved(false)
     setHasStarted(true)
+    setIsTransitioning(false)
     window.setTimeout(() => generateRound(), 0)
   }
 
@@ -270,6 +275,7 @@ const ReadingComprehensionLearning: React.FC = () => {
     const saveScore = async () => {
       setSavingScore(true)
       try {
+        const totalQ = Math.max(1, gameState.totalQuestions || gameState.round || 1)
         await saveGameScore({
           userId: String(user.id),
           gameName: 'reading_comprehension',
@@ -277,7 +283,13 @@ const ReadingComprehensionLearning: React.FC = () => {
           accuracy: gameState.totalQuestions ? gameState.score / gameState.totalQuestions : 0,
           avgResponseTime: (Date.now() - gameState.sessionStartTime) / Math.max(1, gameState.round),
           errors: {},
-          score: gameState.score
+          score: gameState.score,
+          sessionSummary: {
+            gameType: 'reading_comprehension',
+            correct: Math.min(gameState.score, totalQ),
+            total: totalQ,
+            readingSpeedWpm: gameState.readingSpeed,
+          },
         })
       } catch (error) {
         console.error('Failed to save reading comprehension score:', error)
@@ -449,7 +461,7 @@ const ReadingComprehensionLearning: React.FC = () => {
                 </button>
               )}
               <button 
-                onClick={() => speakText(gameState.currentPassage.text)}
+                onClick={() => gameState.currentPassage && speakText(gameState.currentPassage.text)}
                 className="btn btn-ghost btn-sm"
               >
                 <Volume2 className="w-4 h-4 mr-2" />
@@ -508,7 +520,7 @@ const ReadingComprehensionLearning: React.FC = () => {
           <div className="mt-6 text-center">
             <button 
               onClick={submitAnswers}
-              disabled={!allAnswered}
+              disabled={!allAnswered || isTransitioning}
               className="btn btn-primary"
             >
               Submit Answers

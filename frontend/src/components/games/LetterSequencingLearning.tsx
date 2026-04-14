@@ -30,6 +30,7 @@ const LetterSequencingLearning: React.FC = () => {
   const [saving, setSaving] = useState(false)
   const [scoreSaved, setScoreSaved] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
+  const [isTransitioning, setIsTransitioning] = useState(false)
   const [usedWords, setUsedWords] = useState<string[]>([])
   const [gameState, setGameState] = useState<GameState>({
     targetWord: '',
@@ -221,6 +222,7 @@ const LetterSequencingLearning: React.FC = () => {
   }
 
   const checkWord = async () => {
+    if (isTransitioning) return
     const userWord = gameState.userSequence.join('')
     const isCorrect = userWord === gameState.targetWord
     const reactionTime = Date.now() - gameState.startTime
@@ -260,6 +262,7 @@ const LetterSequencingLearning: React.FC = () => {
       speakText(`Not quite. The correct spelling is ${gameState.targetWord}`)
     }
     
+    setIsTransitioning(true)
     setTimeout(() => {
       if (gameState.round >= maxRounds) {
         setGameState(prev => ({ ...prev, gameOver: true }))
@@ -267,6 +270,7 @@ const LetterSequencingLearning: React.FC = () => {
         setGameState(prev => ({ ...prev, round: prev.round + 1 }))
         generateRound()
       }
+      setIsTransitioning(false)
     }, 2500)
   }
 
@@ -310,6 +314,7 @@ const LetterSequencingLearning: React.FC = () => {
     })
     setScoreSaved(false)
     setHasStarted(false)
+    setIsTransitioning(false)
   }
 
   useEffect(() => {
@@ -330,6 +335,7 @@ const LetterSequencingLearning: React.FC = () => {
     }))
     setScoreSaved(false)
     setHasStarted(true)
+    setIsTransitioning(false)
     window.setTimeout(() => generateRound([]), 0)
   }
 
@@ -345,7 +351,12 @@ const LetterSequencingLearning: React.FC = () => {
           accuracy: maxRounds ? gameState.score / maxRounds : 0,
           avgResponseTime: 0,
           errors: {},
-          score: gameState.score
+          score: gameState.score,
+          sessionSummary: {
+            gameType: 'letter_sequencing',
+            correct: Math.min(gameState.score, maxRounds),
+            total: maxRounds,
+          },
         })
       } catch (err) {
         console.error('Failed to save final sequencing score:', err)
@@ -511,7 +522,7 @@ const LetterSequencingLearning: React.FC = () => {
           <div className="flex justify-center space-x-4">
             <button
               onClick={checkWord}
-              disabled={gameState.userSequence.length !== gameState.targetWord.length || !!gameState.feedback || saving}
+              disabled={gameState.userSequence.length !== gameState.targetWord.length || !!gameState.feedback || saving || isTransitioning}
               className="btn btn-primary"
             >
               {saving ? 'Saving...' : 'Check Spelling'}
@@ -519,7 +530,7 @@ const LetterSequencingLearning: React.FC = () => {
             
             <button
               onClick={showHint}
-              disabled={!!gameState.feedback}
+              disabled={!!gameState.feedback || isTransitioning}
               className="btn btn-outline"
             >
               <Lightbulb className="w-4 h-4 mr-2" />
@@ -528,7 +539,7 @@ const LetterSequencingLearning: React.FC = () => {
             
             <button
               onClick={enableTraceMode}
-              disabled={!!gameState.feedback}
+              disabled={!!gameState.feedback || isTransitioning}
               className="btn btn-ghost"
             >
               <MousePointer className="w-4 h-4 mr-2" />
@@ -537,7 +548,7 @@ const LetterSequencingLearning: React.FC = () => {
             
             <button
               onClick={resetRound}
-              disabled={!!gameState.feedback}
+              disabled={!!gameState.feedback || isTransitioning}
               className="btn btn-ghost"
             >
               <RotateCcw className="w-4 h-4 mr-2" />

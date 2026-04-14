@@ -33,7 +33,7 @@ const SoundTwinsLearning: React.FC = () => {
     timeLeft: 12,
     difficulty: 'easy'
   })
-  const [savingScore, setSavingScore] = useState(false)
+  const [, setSavingScore] = useState(false)
   const [scoreSaved, setScoreSaved] = useState(false)
   const [hasStarted, setHasStarted] = useState(false)
 
@@ -210,7 +210,7 @@ const SoundTwinsLearning: React.FC = () => {
   }, [gameState.gameOver, gameState.feedback, gameState.timeLeft, gameState.currentPair.sound1])
 
   useEffect(() => {
-    if (gameState.gameOver || !!gameState.feedback || gameState.timeLeft > 0) return
+    if (gameState.gameOver || gameState.timeLeft > 0 || !gameState.currentPair.sound1) return
     playErrorSound()
     setGameState(prev => ({ ...prev, feedback: "⏰ Time's up! Let's try the next pair." }))
     const timeout = window.setTimeout(() => {
@@ -218,11 +218,11 @@ const SoundTwinsLearning: React.FC = () => {
         setGameState(prev => ({ ...prev, gameOver: true }))
       } else {
         setGameState(prev => ({ ...prev, round: prev.round + 1 }))
-        generateRound()
+        generateRound(gameState.difficulty)
       }
     }, 1200)
     return () => window.clearTimeout(timeout)
-  }, [gameState.timeLeft, gameState.feedback, gameState.gameOver, gameState.round])
+  }, [gameState.timeLeft, gameState.gameOver, gameState.round, gameState.currentPair.sound1, gameState.difficulty])
 
   if (gameState.gameOver) {
     return (
